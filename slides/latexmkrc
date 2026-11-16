@@ -1,0 +1,4 @@
+# latexmk: biên dịch bằng XeLaTeX (Unicode tiếng Việt + phông Times New Roman)
+$pdf_mode = 5;   # 5 = xelatex
+$xelatex = "xelatex -synctex=1 -interaction=nonstopmode -file-line-error %O %S";
+@generated_exts = (@generated_exts, "synctex.gz", "xdv", "lol");
