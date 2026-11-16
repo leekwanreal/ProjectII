@@ -1,0 +1,33 @@
+sequenceDiagram
+  autonumber
+  actor GV as Giáo vụ
+  actor LD as Lãnh đạo
+  participant UI as Dashboard quản trị
+  participant API as Admin API
+  participant ES as EnrollmentService
+  participant R as rules.js
+  participant DB as SQLite
+  GV->>UI: Chọn hồ sơ TESTED và lớp
+  UI->>API: POST /api/admin/registrations/{id}/enroll
+  API->>ES: enroll(regId, classId, reason)
+  ES->>DB: BEGIN · đọc hồ sơ, lớp, sĩ số
+  ES->>R: placementDecision(class, enrolled, levels)
+  alt ENROLL
+    ES->>DB: status = ENROLLED, class_id
+  else NEEDS_APPROVAL (Offline đã đủ 30)
+    ES->>DB: status = WAITING_APPROVAL
+    ES->>DB: tạo / cập nhật approval_requests (PENDING)
+  else REJECT
+    ES-->>API: 409 / 422 kèm lý do
+  end
+  ES->>DB: COMMIT
+  API-->>UI: Kết quả xếp lớp
+  LD->>UI: Mở mục Phê duyệt
+  UI->>API: GET /api/admin/approvals
+  API->>R: proposeResolution(30, k, sức chứa phòng)
+  API-->>UI: Tờ trình + phương án đề xuất
+  LD->>UI: Chọn Tách lớp + ghi chú
+  UI->>API: POST /api/admin/approvals/{id}/decide
+  API->>ES: decide(SPLIT)
+  ES->>DB: BEGIN · tạo lớp mới + lịch · chuyển học viên · APPROVED · COMMIT
+  API-->>UI: Lớp mới và sĩ số hai lớp

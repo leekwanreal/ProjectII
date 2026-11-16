@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LinguaPro – Trung tâm luyện thi chứng chỉ ngoại ngữ</title>
+  <meta name="description" content="Luyện thi IELTS, TOEIC, VSTEP, Cambridge – đăng ký trực tuyến, kiểm tra đầu vào, tư vấn trực tuyến.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23b3261e'/><text x='32' y='44' font-size='34' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>L</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/portal.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-in">
+      <a class="brand" href="#top"><span class="logo">L</span><span><b>LinguaPro</b><small>Trung tâm luyện thi chứng chỉ ngoại ngữ</small></span></a>
+      <nav class="nav" id="nav">
+        <a href="#khoa-hoc">Khoá học</a>
+        <a href="#tra-cuu">Tra cứu lớp</a>
+        <a href="#dang-ky">Đăng ký</a>
+        <a href="#" data-action="lookup">Tra cứu hồ sơ</a>
+        <a href="/admin" class="nav-admin">Văn phòng</a>
+      </nav>
+      <button class="btn btn-primary btn-sm nav-cta" data-action="chat">💬 Tư vấn ngay</button>
+      <button class="theme-btn" data-action="theme" title="Chuyển chế độ sáng / tối" aria-label="Chuyển chế độ sáng / tối">🌙</button>
+      <button class="burger" id="burger" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="container hero-in">
+      <div class="hero-copy">
+        <span class="eyebrow">Chuẩn quốc tế · Chuẩn quốc gia</span>
+        <h1>Chinh phục chứng chỉ <span class="hl">IELTS, TOEIC, VSTEP</span> cùng lộ trình cá nhân hoá</h1>
+        <p class="lead">Đăng ký trực tuyến, nộp học phí, làm bài kiểm tra đầu vào và được xếp lớp đúng trình độ – học Online linh hoạt hoặc Offline tại cơ sở.</p>
+        <div class="row">
+          <a class="btn btn-primary btn-lg" href="#tra-cuu">Xem lịch khai giảng</a>
+          <button class="btn btn-outline btn-lg" data-action="lookup">Tra cứu hồ sơ</button>
+        </div>
+        <div class="stats" id="hero-stats">
+          <div><b>–</b><span>khoá học</span></div><div><b>–</b><span>lớp đang tuyển sinh</span></div>
+          <div><b>–</b><span>học viên đã đăng ký</span></div><div><b>–</b><span>giảng viên</span></div>
+        </div>
+      </div>
+      <aside class="hero-card card">
+        <h3>Quy định mở lớp</h3>
+        <div class="rule"><span class="badge b-blue plain">ONLINE</span><div><b>Từ 10 học viên</b><p class="muted small">Học qua phòng học trực tuyến, sĩ số linh hoạt, không yêu cầu đủ 20.</p></div></div>
+        <div class="rule"><span class="badge b-red plain">OFFLINE</span><div><b>20 – 30 học viên / lớp</b><p class="muted small">Mở lớp khi đủ 20. Vượt 30 học viên, Lãnh đạo trung tâm quyết định tách lớp.</p></div></div>
+        <h3 style="margin-top:18px">4 bước nhập học</h3>
+        <ol class="flow">
+          <li><b>Đăng ký</b> trực tuyến, nhận mã hồ sơ</li>
+          <li><b>Nộp học phí</b> qua VNPay / MoMo / chuyển khoản</li>
+          <li><b>Kiểm tra đầu vào</b> 20 câu – 20 phút</li>
+          <li><b>Xếp lớp</b> đúng trình độ CEFR</li>
+        </ol>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CHỨC NĂNG 1: QUẢNG BÁ KHOÁ HỌC -->
+  <section class="section" id="khoa-hoc">
+    <div class="container">
+      <div class="section-head">
+        <div><span class="eyebrow">Chương trình đào tạo</span><h2>Khoá học luyện thi</h2><p class="muted">Lộ trình, chuẩn đầu ra và học phí minh bạch cho từng chứng chỉ.</p></div>
+        <div class="chips" id="cert-chips"></div>
+      </div>
+      <div class="course-grid" id="course-grid"></div>
+    </div>
+  </section>
+
+  <!-- CHỨC NĂNG 3: TRA CỨU LỚP -->
+  <section class="section alt" id="tra-cuu">
+    <div class="container">
+      <div class="section-head">
+        <div><span class="eyebrow">Lịch khai giảng</span><h2>Tra cứu danh sách lớp</h2><p class="muted">Lọc theo hình thức, ca học, trình độ và ngày khai giảng.</p></div>
+      </div>
+      <form class="filters card" id="filters" autocomplete="off">
+        <div class="field grow"><label for="f-q">Từ khoá</label><input class="input" id="f-q" name="q" placeholder="Mã lớp, tên khoá, giảng viên…"></div>
+        <div class="field"><label for="f-cert">Chứng chỉ</label><select class="input" id="f-cert" name="certificate"><option value="">Tất cả</option><option>IELTS</option><option>TOEIC</option><option>VSTEP</option><option value="CAMBRIDGE">Cambridge</option></select></div>
+        <div class="field"><label>Hình thức</label>
+          <div class="seg" id="f-form"><button type="button" data-v="" class="on">Tất cả</button><button type="button" data-v="ONLINE">Online</button><button type="button" data-v="OFFLINE">Offline</button></div></div>
+        <div class="field"><label for="f-shift">Ca học</label><select class="input" id="f-shift" name="shift"><option value="">Mọi ca</option><option value="MORNING">Sáng 08:00–10:00</option><option value="AFTERNOON">Chiều 14:00–16:00</option><option value="EVENING">Tối 18:30–20:30</option></select></div>
+        <div class="field"><label for="f-level">Trình độ</label><select class="input" id="f-level" name="level"><option value="">Mọi trình độ</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option></select></div>
+        <div class="field"><label for="f-from">Khai giảng từ</label><input class="input" type="date" id="f-from" name="from"></div>
+        <label class="check"><input type="checkbox" id="f-avail" name="available"> Chỉ lớp còn chỗ</label>
+        <button type="button" class="btn btn-ghost btn-sm" id="f-reset">Xoá lọc</button>
+      </form>
+      <div class="result-meta" id="result-meta"></div>
+      <div class="class-list" id="class-list"></div>
+    </div>
+  </section>
+
+  <!-- CHỨC NĂNG 2: ĐĂNG KÝ -->
+  <section class="section" id="dang-ky">
+    <div class="container reg-wrap">
+      <div class="card card-pad reg-card">
+        <span class="eyebrow">Đăng ký trực tuyến</span>
+        <h2>Đăng ký học</h2>
+        <p class="muted">Sau khi gửi, bạn nhận <b>mã hồ sơ</b> để nộp học phí và làm bài kiểm tra đầu vào.</p>
+        <form id="reg-form" novalidate>
+          <div class="form-grid">
+            <div class="field full"><label for="r-name">Họ và tên <span class="req">*</span></label><input class="input" id="r-name" name="full_name" placeholder="Nguyễn Văn A"><div class="err" data-for="full_name"></div></div>
+            <div class="field"><label for="r-phone">Số điện thoại <span class="req">*</span></label><input class="input" id="r-phone" name="phone" inputmode="tel" placeholder="09xx xxx xxx"><div class="err" data-for="phone"></div></div>
+            <div class="field"><label for="r-email">Email <span class="req">*</span></label><input class="input" id="r-email" name="email" type="email" placeholder="ban@example.com"><div class="err" data-for="email"></div></div>
+            <div class="field"><label for="r-dob">Ngày sinh</label><input class="input" id="r-dob" name="dob" type="date"><div class="err" data-for="dob"></div></div>
+            <div class="field"><label for="r-course">Khoá học <span class="req">*</span></label><select class="input" id="r-course" name="course_id"><option value="">— Chọn khoá học —</option></select><div class="err" data-for="course_id"></div></div>
+            <div class="field"><label>Hình thức <span class="req">*</span></label>
+              <div class="seg" id="r-form-seg"><label><input type="radio" name="desired_form" value="ONLINE"><span>Online</span></label><label><input type="radio" name="desired_form" value="OFFLINE" checked><span>Offline</span></label></div>
+              <div class="err" data-for="desired_form"></div></div>
+            <div class="field"><label for="r-shift">Ca học mong muốn <span class="req">*</span></label><select class="input" id="r-shift" name="desired_shift"><option value="EVENING">Tối 18:30–20:30</option><option value="MORNING">Sáng 08:00–10:00</option><option value="AFTERNOON">Chiều 14:00–16:00</option></select><div class="err" data-for="desired_shift"></div></div>
+            <div class="field full"><label for="r-class">Lớp mong muốn (không bắt buộc)</label><select class="input" id="r-class" name="desired_class_id"><option value="">Để văn phòng xếp theo kết quả kiểm tra</option></select><div class="err" data-for="desired_class_id"></div></div>
+            <div class="field full"><label for="r-note">Ghi chú / mục tiêu</label><textarea class="input" id="r-note" name="note" rows="2" maxlength="500" placeholder="Ví dụ: cần chứng chỉ trước tháng 6/2027"></textarea></div>
+          </div>
+          <div class="row" style="margin-top:16px"><button class="btn btn-primary btn-lg" type="submit" id="reg-submit">Gửi đăng ký</button><span class="tiny">Thông tin chỉ dùng cho mục đích tuyển sinh.</span></div>
+        </form>
+      </div>
+      <aside class="reg-side">
+        <div class="card card-pad" id="fee-card"><span class="eyebrow">Học phí khoá đã chọn</span><div class="fee" id="fee-value">—</div><div class="muted small" id="fee-desc">Chọn khoá học để xem học phí và lộ trình.</div></div>
+        <div class="card card-pad">
+          <h3>Đã có mã hồ sơ?</h3>
+          <p class="muted small">Tra cứu để nộp học phí, làm bài kiểm tra đầu vào hoặc xem lớp được xếp.</p>
+          <button class="btn btn-navy btn-block" data-action="lookup">Tra cứu hồ sơ</button>
+          <p class="tiny" style="margin-top:12px">Dữ liệu demo: <span class="mono">0912345678</span>, <span class="mono">0987654321</span>, <span class="mono">0905123456</span> – mã hồ sơ in ra khi khởi tạo CSDL.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container row">
+      <div><b>LinguaPro</b> · Prototype Project II – Đề tài 1A · SV: Nguyễn Lê Quân (20235199) · GVHD: TS. Nguyễn Thị Thu Hương</div>
+      <div class="spacer"></div>
+      <a href="/admin">Đăng nhập văn phòng →</a>
+    </div>
+  </footer>
+
+  <!-- CHỨC NĂNG 4: CHAT WIDGET -->
+  <button class="chat-fab" id="chat-fab" data-action="chat" aria-label="Mở tư vấn trực tuyến">💬<span class="dot hidden" id="chat-dot"></span></button>
+  <div class="chat-panel hidden" id="chat-panel" aria-live="polite">
+    <div class="chat-head">
+      <div class="avatar">TV</div>
+      <div><b>Tư vấn trực tuyến</b><small id="chat-status">Thường phản hồi trong 1 phút</small></div>
+      <button class="x" id="chat-min" aria-label="Thu nhỏ">—</button>
+    </div>
+    <form class="chat-start" id="chat-start">
+      <p class="muted small">Để lại thông tin để tư vấn viên hỗ trợ bạn nhanh nhất.</p>
+      <input class="input" name="name" placeholder="Tên của bạn *" maxlength="60" required>
+      <input class="input" name="contact" placeholder="SĐT hoặc email" maxlength="80">
+      <select class="input" name="topic"><option>Chọn khoá học phù hợp</option><option>Lịch khai giảng</option><option>Học phí & thanh toán</option><option>Kiểm tra đầu vào</option><option>Khác</option></select>
+      <button class="btn btn-primary btn-block" type="submit">Bắt đầu trò chuyện</button>
+    </form>
+    <div class="chat-body hidden" id="chat-body">
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="typing hidden" id="chat-typing">Tư vấn viên đang soạn tin…</div>
+      <form class="chat-input" id="chat-form"><input class="input" id="chat-text" placeholder="Nhập tin nhắn…" maxlength="2000" autocomplete="off"><button class="btn btn-primary" type="submit">Gửi</button></form>
+      <div class="chat-foot"><button class="btn btn-ghost btn-sm" id="chat-end">Kết thúc trò chuyện</button></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/portal.js"></script>
+  <script src="/js/chat-widget.js"></script>
+</body>
+</html>

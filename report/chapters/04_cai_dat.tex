@@ -1,0 +1,148 @@
+\chapter{Cài đặt hệ thống}
+\label{ch:impl}
+
+\section{Công nghệ sử dụng}
+\begin{table}[H]\centering
+\caption{Công nghệ và lý do lựa chọn}\label{tab:tech}
+\begin{tabularx}{\linewidth}{|L{3.3cm}|L{3.4cm}|Y|}
+  \hline
+  \headrow \hd{Thành phần} & \hd{Công nghệ} & \hd{Lý do lựa chọn} \\ \hline
+  Máy chủ & Node.js 24, Express 5 & Một ngôn ngữ (JavaScript) cho cả client và server; Express gọn nhẹ, tự chuyển lỗi đồng bộ tới bộ xử lý lỗi tập trung \\ \hline
+  Thời gian thực & Socket.IO 4 & Hỗ trợ phòng (room), xác nhận (ack), tự kết nối lại – phù hợp chat có hàng đợi \\ \hline
+  Cơ sở dữ liệu & SQLite 3 + better-sqlite3 & Không cần cài máy chủ CSDL, một tệp duy nhất; API đồng bộ và \texttt{transaction()} giúp viết giao dịch rõ ràng; hỗ trợ partial index, view, CHECK \\ \hline
+  Giao diện & HTML5, CSS3, JavaScript thuần & Không cần bước build; hệ thống thiết kế tự viết (biến CSS, chế độ sáng/tối) \\ \hline
+  Biểu đồ thống kê & Chart.js 4 & Phục vụ cục bộ từ \texttt{node\_modules}, chạy offline \\ \hline
+  Kiểm thử & \texttt{node:test}, socket.io-client & Có sẵn trong Node.js, không cần thư viện ngoài \\ \hline
+  Biểu đồ UML & Mermaid CLI & Biểu đồ dạng mã, render cục bộ bằng trình duyệt có sẵn \\ \hline
+\end{tabularx}
+\end{table}
+
+\section{Cấu trúc mã nguồn}
+\begin{figure}[H]
+\begin{PlainCode}
+ProjectII/
+|-- server/
+|   |-- index.js            khởi động HTTP + Socket.IO, nạp dữ liệu mẫu khi CSDL trống
+|   |-- app.js              cấu hình Express, định tuyến, xử lý lỗi tập trung
+|   |-- config.js           ngưỡng sĩ số (10 / 20 / 30), ca học, thời gian thi
+|   |-- domain/rules.js     BUSINESS RULES: hàm thuần BR-01..BR-08
+|   |-- services/           catalog, registration, placement, enrollment, chat, stats, auth
+|   |-- routes/             public.js (cổng học viên), admin.js (văn phòng)
+|   |-- sockets/chat.js     sự kiện chat realtime
+|   |-- middleware/auth.js  kiểm tra token + vai trò
+|   `-- db/                 schema.sql, connection.js, seed.js, questions.js
+|-- public/                 index.html (cổng học viên), admin.html (dashboard), css/, js/
+|-- tests/                  rules.test.js, api.test.js, chat.test.js
+|-- docs/                   analysis/*.md, diagrams/src/*.mmd -> diagrams/png/*.png
+|-- tools/                  render-diagrams.js, screenshots.js
+`-- report/                 báo cáo LaTeX (main.tex, chapters/, images/)
+\end{PlainCode}
+\captionof{lstlisting}{Cấu trúc thư mục dự án}\label{lst:tree}
+\end{figure}
+Toàn bộ dự án gồm khoảng 4\,200 dòng mã (JavaScript, SQL, HTML, CSS), không tính thư viện.
+
+\section{Cài đặt bộ quy tắc nghiệp vụ}
+Mọi quy tắc sĩ số nằm trong \texttt{server/domain/rules.js}. Đoạn mã~\ref{lst:decision} là hàm quyết định khi giáo vụ xếp một hồ sơ vào lớp – ánh xạ trực tiếp BR-02, BR-04, BR-06.
+\begin{lstlisting}[language=JavaScript,caption={Hàm \texttt{placementDecision} (rút gọn)},label=lst:decision]
+function placementDecision({ cls, enrolled, registration, studentLevel, reason }) {
+  if (registration.status !== 'TESTED')
+    return { action: 'REJECT', code: 'INVALID_STATUS' };
+  if (cls.course_id !== registration.course_id)
+    return { action: 'REJECT', code: 'WRONG_COURSE' };   // phải đúng khoá đã nộp phí
+  if (!['RECRUITING', 'IN_PROGRESS'].includes(cls.status))
+    return { action: 'REJECT', code: 'CLASS_CLOSED' };
+  if (studentLevel && cls.level !== studentLevel && !(reason && reason.trim().length >= 5))
+    return { action: 'REJECT', code: 'LEVEL_MISMATCH' };  // BR-06
+  const { max } = limitsOf(cls.form);                     // ONLINE 40 / OFFLINE 30
+  if (cls.form === 'ONLINE')
+    return enrolled >= max ? { action: 'REJECT', code: 'ONLINE_FULL' }   // BR-02
+                           : { action: 'ENROLL', code: 'OK' };
+  if (enrolled >= max)
+    return { action: 'NEEDS_APPROVAL', code: 'OVER_30' };  // BR-04: không tự xếp
+  return { action: 'ENROLL', code: 'OK' };
+}
+\end{lstlisting}
+
+Đoạn mã~\ref{lst:propose} hiện thực phân tích ở mục~\ref{sec:br}: chỉ chia đều khi tổng sĩ số đủ để cả hai lớp đạt ngưỡng 20.
+\begin{lstlisting}[language=JavaScript,caption={Hàm \texttt{proposeResolution} – phương án xử lý tờ trình},label=lst:propose]
+function proposeResolution({ enrolled, waiting, roomCapacity = null, inProgress = false }) {
+  const { min } = CAPACITY.OFFLINE;                 // 20
+  const total = enrolled + waiting;
+  const even = !inProgress && total >= 2 * min;     // 40: hai lớp đều >= 20
+  const split = even
+    ? { mode: 'EVEN', sizes: [Math.ceil(total / 2), Math.floor(total / 2)] }
+    : { mode: 'REMAINDER', sizes: [enrolled, waiting] };   // lớp mới tiếp tục tuyển sinh
+  const keepFeasible = roomCapacity == null || roomCapacity >= total;  // BR-05
+  const recommended = even || !keepFeasible ? 'SPLIT' : 'KEEP';
+  return { total, recommended, options: { SPLIT: split, KEEP: { feasible: keepFeasible }, REJECT: {} } };
+}
+\end{lstlisting}
+
+\section{Cài đặt giao dịch xếp lớp và phê duyệt}
+Các thao tác thay đổi nhiều bảng được bọc trong \texttt{db.tx()} (giao dịch của better-sqlite3): nếu bất kỳ bước nào ném lỗi, toàn bộ thay đổi bị huỷ. Khi Lãnh đạo chọn \emph{tách lớp}, hệ thống trong cùng một giao dịch: tạo lớp mới (sao chép khoá, trình độ, hình thức, lịch học, gắn \texttt{parent\_class\_id}); tự tìm giảng viên và phòng còn trống không trùng lịch (BR-05); chuyển các hồ sơ chờ sang lớp mới; nếu chia đều thì chuyển thêm những học viên được xếp muộn nhất; cuối cùng cập nhật tờ trình.
+\begin{lstlisting}[language=JavaScript,caption={Xếp lớp: lập hoặc bổ sung tờ trình trong cùng giao dịch (rút gọn)},label=lst:enroll]
+function enroll(regId, classId, reason, staffId) {
+  return db.tx(() => {
+    const reg = d.prepare('SELECT * FROM registrations WHERE registration_id = ?').get(regId);
+    const cls = rawClass(classId);
+    const { enrolled, waiting } = counts(classId);           // từ view v\_class\_enrollment
+    const decision = rules.placementDecision({ cls, enrolled, registration: reg,
+                                               studentLevel: assessedLevel(regId), reason });
+    if (decision.action === 'REJECT') throw unprocessable(decision.code, decision.message);
+    if (decision.action === 'ENROLL') { /* UPDATE ... status = 'ENROLLED' */ return ...; }
+    // NEEDS\_APPROVAL: lập hoặc bổ sung tờ trình
+    d.prepare(`UPDATE registrations SET class_id = ?, status = 'WAITING_APPROVAL' ...`).run(...);
+    const pending = d.prepare("SELECT request_id FROM approval_requests " +
+                              "WHERE class_id = ? AND status = 'PENDING'").get(classId);
+    if (pending) { ... }      // bổ sung vào tờ trình đang chờ
+    else { ... }             // INSERT approval\_requests (PENDING)
+  });
+}
+\end{lstlisting}
+Chỉ mục duy nhất có điều kiện \texttt{ux\_pending\_request ON approval\_requests(class\_id) WHERE status = 'PENDING'} bảo đảm kể cả khi hai giáo vụ thao tác đồng thời cũng không thể sinh hai tờ trình cho cùng một lớp.
+
+\section{Cài đặt chat thời gian thực}
+\begin{table}[H]\centering
+\caption{Các sự kiện Socket.IO}\label{tab:events}
+\begin{tabularx}{\linewidth}{|l|L{2.6cm}|Y|}
+  \hline
+  \headrow \hd{Sự kiện} & \hd{Phía gửi} & \hd{Xử lý} \\ \hline
+  \texttt{chat:start} & Khách & Tạo phiên WAITING, gửi lời chào, phát \texttt{queue:update} tới phòng \texttt{consultants} \\ \hline
+  \texttt{chat:resume} & Khách / NV & Tham gia lại phòng \texttt{session:<id>}, trả lịch sử tin nhắn \\ \hline
+  \texttt{chat:claim} & Tư vấn viên & \texttt{UPDATE ... WHERE status = 'WAITING'} – chỉ một người nhận được; phiên ACTIVE \\ \hline
+  \texttt{chat:message} & Hai phía & Kiểm tra quyền (khách đúng phiên, tư vấn viên đã nhận phiên), lưu CSDL rồi phát tới phòng \\ \hline
+  \texttt{chat:typing} & Hai phía & Chuyển tiếp chỉ báo “đang soạn tin” \\ \hline
+  \texttt{chat:close} & Hai phía & Phiên CLOSED, gửi tin hệ thống, phát \texttt{chat:closed} \\ \hline
+\end{tabularx}
+\end{table}
+Tư vấn viên kết nối socket kèm token trong \texttt{handshake.auth}; máy chủ xác thực token và đưa socket vào phòng \texttt{consultants}. Mọi handler được bọc để lỗi nghiệp vụ trả về qua \texttt{ack} thay vì làm đứt kết nối.
+
+\section{Bảo mật}
+\begin{itemize}
+  \item \textbf{Mật khẩu:} \texttt{scrypt} với salt ngẫu nhiên 16 byte; so sánh bằng \texttt{timingSafeEqual}.
+  \item \textbf{Phiên đăng nhập:} token \texttt{payload.chữ\_ký} ký HMAC-SHA256, hết hạn sau 12 giờ; middleware \texttt{requireStaff(...roles)} kiểm tra vai trò cho từng API.
+  \item \textbf{SQL injection:} 100\% truy vấn dùng placeholder \texttt{?}; kiểm thử với chuỗi \verb|' OR 1=1 --| trả về danh sách rỗng.
+  \item \textbf{XSS:} mọi dữ liệu người dùng (tên, tin nhắn chat) được escape trước khi chèn vào HTML.
+  \item \textbf{Dữ liệu cá nhân:} tra cứu hồ sơ phải khớp cả mã và SĐT; sai một trong hai đều trả cùng thông báo 404 để không lộ thông tin.
+\end{itemize}
+
+\section{Kết quả giao diện}
+\subsection{Cổng học viên}
+\fig[0.92\linewidth]{01_trang_chu}{Trang chủ cổng học viên: quy định mở lớp và quy trình 4 bước}{fig:s1}
+\fig[0.92\linewidth]{02_khoa_hoc}{Chức năng 1 – Quảng bá: danh mục khoá học, lọc theo chứng chỉ}{fig:s2}
+\fig[0.92\linewidth]{03_chi_tiet_khoa_hoc}{Chức năng 1 – Chi tiết khoá học: lộ trình, chuẩn đầu ra và các lớp đang mở}{fig:s3}
+\fig[0.92\linewidth]{04_tra_cuu_lop}{Chức năng 3 – Tra cứu lớp: lọc Offline + ca tối; thanh sĩ số có vạch ngưỡng mở lớp}{fig:s4}
+\fig[0.92\linewidth]{05_dang_ky_validate}{Chức năng 2 – Form đăng ký với kiểm tra hợp lệ theo từng trường}{fig:s5}
+\fig[0.92\linewidth]{18_tra_cuu_ho_so_thanh_toan}{Tra cứu hồ sơ: tiến trình 4 bước và nộp học phí}{fig:s18}
+\fig[0.92\linewidth]{20_bai_kiem_tra}{Bài kiểm tra đầu vào: 20 câu, đồng hồ đếm ngược}{fig:s20}
+\fig[0.92\linewidth]{21_tra_cuu_ho_so_da_thi}{Hồ sơ sau khi thi: kết quả CEFR đã chuyển về văn phòng}{fig:s21}
+\fig[0.92\linewidth]{16_chat_hoc_vien_nhan_tin}{Chức năng 4 – Widget chat phía học viên nhận phản hồi realtime}{fig:s16}
+
+\subsection{Dashboard quản trị}
+\fig[0.92\linewidth]{08_dashboard}{Dashboard tổng quan: KPI, doanh thu – đăng ký 6 tháng, phễu tuyển sinh}{fig:s8}
+\fig[0.92\linewidth]{09_dashboard_2}{Dashboard: sĩ số các lớp đang tuyển sinh so với ngưỡng, phân bố trình độ CEFR}{fig:s9}
+\fig[0.92\linewidth]{11_xep_lop}{Xếp lớp: gợi ý lớp theo BR-06; lớp đủ 30 hiển thị nút “Lập tờ trình”}{fig:s11}
+\fig[0.92\linewidth]{13_chi_tiet_lop}{Chi tiết lớp: lý do chưa đủ điều kiện mở, lập lịch theo thứ – ca, phân phòng}{fig:s13}
+\fig[0.92\linewidth]{14_phe_duyet}{Phê duyệt sĩ số: hệ thống đề xuất “giữ ngoại lệ” (33 \texorpdfstring{$\leq$}{<=} 40 chỗ) và “chia đều 21 + 21” (42 học viên)}{fig:s14}
+\fig[0.92\linewidth]{15_console_tu_van}{Chức năng 4 – Console tư vấn: hàng đợi phiên chat và hội thoại realtime}{fig:s15}
+\fig[0.4\linewidth]{17_mobile_dark}{Giao diện trên điện thoại ở chế độ tối}{fig:s17}

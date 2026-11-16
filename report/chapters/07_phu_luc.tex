@@ -1,0 +1,44 @@
+\chapter{Hướng dẫn cài đặt và chạy thử}
+\label{app:setup}
+
+\section{Yêu cầu môi trường}
+Node.js $\geq$ 22 (đã thử trên Node.js 24.11), trình duyệt Chrome hoặc Edge. Không cần cài đặt máy chủ CSDL. Để biên dịch báo cáo cần MiKTeX hoặc TeX Live có XeLaTeX.
+
+\section{Các lệnh}
+\begin{figure}[H]
+\begin{PlainCode}
+cd ProjectII
+npm install            # cài thư viện
+npm run seed           # (tuỳ chọn) tạo lại CSDL mẫu database.sqlite
+npm start              # http://localhost:3000  (cổng học viên)
+                       # http://localhost:3000/admin  (văn phòng)
+npm test               # chạy 72 ca kiểm thử tự động
+npm run diagrams       # render lại 21 biểu đồ Mermaid -> docs/diagrams/png
+npm run screenshots    # chụp lại ảnh giao diện (khi máy chủ đang chạy)
+cd report && latexmk -xelatex main.tex   # biên dịch báo cáo
+\end{PlainCode}
+\captionof{lstlisting}{Cài đặt và chạy}\label{lst:run}
+\end{figure}
+Trong VS Code (tiện ích LaTeX Workshop), chọn recipe \textit{latexmk (XeLaTeX)} đã được cấu hình sẵn trong \texttt{.vscode/settings.json}.
+
+\section{Tài khoản và dữ liệu demo}
+\begin{table}[H]\centering
+\caption{Tài khoản nhân viên (mật khẩu \texttt{123456})}\label{tab:accounts}
+\begin{tabular}{|l|l|l|}
+  \hline
+  \headrow \hd{Tên đăng nhập} & \hd{Họ tên} & \hd{Vai trò} \\ \hline
+  \texttt{tuvan1}, \texttt{tuvan2} & Phạm Thu Trang, Lê Minh Đức & Tư vấn viên \\ \hline
+  \texttt{giaovu} & Trần Thị Mai & Giáo vụ \\ \hline
+  \texttt{lanhdao} & Nguyễn Văn Hùng & Lãnh đạo trung tâm \\ \hline
+\end{tabular}
+\end{table}
+Dữ liệu mẫu gồm 8 khoá học, 20 lớp, 8 giảng viên, 7 phòng học, 410 hồ sơ, 45 câu hỏi kiểm tra và 4 phiên chat, được thiết kế để phủ mọi trạng thái nghiệp vụ. Ba học viên demo có SĐT cố định để thử tra cứu hồ sơ: \texttt{0912345678} (chờ nộp phí), \texttt{0987654321} (đã nộp – chờ thi), \texttt{0905123456} (đã thi – chờ xếp lớp); mã hồ sơ tương ứng được in ra khi chạy \texttt{npm run seed}.
+
+\section{Kịch bản chạy thử đầu – cuối}
+\begin{enumerate}
+  \item \textbf{Cổng học viên:} xem khoá học (CN1) → lọc lớp Offline, ca tối (CN3) → bấm “Đăng ký lớp này” và gửi form (CN2) → “Nộp học phí ngay” → làm bài kiểm tra → xem kết quả CEFR.
+  \item \textbf{Chat (CN4):} mở widget chat ở cổng học viên; ở cửa sổ khác đăng nhập \texttt{tuvan1}, vào “Tư vấn trực tuyến”, nhận phiên và trả lời – tin nhắn xuất hiện tức thì ở hai phía.
+  \item \textbf{Xếp lớp:} đăng nhập \texttt{giaovu} → “Hồ sơ \& xếp lớp” → chọn hồ sơ vừa thi → xếp vào lớp \texttt{VSTEP-B1-B1-OFF-01} (đang 29/30): học viên thứ 30 được xếp ngay; xếp thêm một học viên nữa → hệ thống tự lập tờ trình.
+  \item \textbf{Phê duyệt:} đăng nhập \texttt{lanhdao} → “Phê duyệt sĩ số”: tờ trình lớp \texttt{VSTEP-B1-A2-OFF-02} (30 + 12) được đề xuất chia đều 21 + 21; tờ trình lớp \texttt{IELTS-I-B1-OFF-02} (30 + 3, phòng 40 chỗ) được đề xuất giữ ngoại lệ.
+  \item \textbf{Mở lớp:} lớp \texttt{VSTEP-B2-B2-OFF-01} có 21 học viên nhưng chưa có phòng → không mở được; phân phòng P.302 ca chiều T3–T5 → mở lớp thành công.
+\end{enumerate}

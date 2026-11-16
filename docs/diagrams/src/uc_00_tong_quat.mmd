@@ -1,0 +1,36 @@
+flowchart LR
+  KH["👤<br/>Khách / Học viên"]:::actor
+  TV["👤<br/>Tư vấn viên"]:::actor
+  GV["👤<br/>Giáo vụ"]:::actor
+  LD["👤<br/>Lãnh đạo trung tâm"]:::actor
+  PAY["⚙<br/>Cổng thanh toán"]:::actor
+  subgraph SYS["Hệ thống quản lý trung tâm luyện thi ngoại ngữ"]
+    direction TB
+    U1(["UC-01 Xem thông tin khoá / lớp học"]):::core
+    U2(["UC-02 Tra cứu danh sách lớp"]):::core
+    U3(["UC-03 Đăng ký học"]):::core
+    U6(["UC-06 Tư vấn trực tuyến (chat)"]):::core
+    U4(["UC-04 Thanh toán học phí"]):::uc
+    U5(["UC-05 Kiểm tra trình độ đầu vào"]):::uc
+    U7(["UC-07 Xếp lớp"]):::uc
+    U9(["UC-09 Lập lịch, phân phòng, mở lớp"]):::uc
+    U8(["UC-08 Phê duyệt tờ trình vượt sĩ số"]):::rule
+    U10(["UC-10 Xem dashboard thống kê"]):::uc
+  end
+  KH --- U1
+  KH --- U2
+  KH --- U3
+  KH --- U6
+  KH --- U4
+  KH --- U5
+  U4 --- PAY
+  U6 --- TV
+  U7 --- GV
+  U9 --- GV
+  U4 --- GV
+  U8 --- LD
+  U10 --- LD
+classDef actor fill:#ffffff,stroke:#1F4E8C,stroke-width:2.5px,color:#14213D,font-weight:bold
+classDef uc fill:#EAF1FB,stroke:#1F4E8C,stroke-width:1.5px,color:#14213D
+classDef core fill:#FFF4D6,stroke:#C9A227,stroke-width:2px,color:#14213D,font-weight:bold
+classDef rule fill:#FDECEC,stroke:#B3261E,stroke-width:1.5px,color:#14213D

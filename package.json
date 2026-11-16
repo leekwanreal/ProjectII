@@ -1,0 +1,35 @@
+{
+  "name": "trung-tam-ngoai-ngu",
+  "version": "1.0.0",
+  "description": "Project II – Đề tài 1A: Hệ thống hỗ trợ quản lý trung tâm luyện thi chứng chỉ ngoại ngữ (Nguyễn Lê Quân – 20235199)",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "seed": "node server/db/seed.js",
+    "test": "node --test --test-reporter=spec \"tests/*.test.js\"",
+    "diagrams": "node tools/render-diagrams.js",
+    "screenshots": "node tools/screenshots.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leekwanreal/ProjectII.git"
+  },
+  "author": "Nguyễn Lê Quân",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/leekwanreal/ProjectII/issues"
+  },
+  "homepage": "https://github.com/leekwanreal/ProjectII#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "chart.js": "^4.6.1",
+    "express": "^5.3.0",
+    "socket.io": "^4.8.4"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.17.1",
+    "socket.io-client": "^4.8.4"
+  }
+}

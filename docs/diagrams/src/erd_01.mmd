@@ -1,0 +1,128 @@
+erDiagram
+  COURSES ||--o{ CLASSES : "mở"
+  TEACHERS ||--o{ CLASSES : "dạy"
+  ROOMS |o--o{ CLASSES : "đặt tại"
+  CLASSES ||--|{ CLASS_SCHEDULES : "có lịch"
+  CLASSES |o--o{ CLASSES : "tách từ"
+  STUDENTS ||--o{ REGISTRATIONS : "nộp"
+  COURSES ||--o{ REGISTRATIONS : "cho khoá"
+  CLASSES |o--o{ REGISTRATIONS : "xếp vào"
+  REGISTRATIONS ||--o| PAYMENTS : "thanh toán"
+  REGISTRATIONS ||--o| PLACEMENT_ATTEMPTS : "thi"
+  CLASSES ||--o{ APPROVAL_REQUESTS : "tờ trình"
+  STAFF_USERS |o--o{ APPROVAL_REQUESTS : "duyệt"
+  STAFF_USERS |o--o{ PAYMENTS : "thu"
+  STAFF_USERS |o--o{ CHAT_SESSIONS : "tư vấn"
+  CHAT_SESSIONS ||--o{ CHAT_MESSAGES : "gồm"
+  COURSES {
+    int course_id PK
+    text code UK
+    text name
+    text certificate
+    text target
+    int total_hours
+    int tuition_fee
+    text outcomes
+    text syllabus
+  }
+  CLASSES {
+    int class_id PK
+    text code UK
+    int course_id FK
+    text level
+    text form
+    date start_date
+    date end_date
+    int teacher_id FK
+    int room_id FK
+    text status
+    int parent_class_id FK
+  }
+  CLASS_SCHEDULES {
+    int schedule_id PK
+    int class_id FK
+    int weekday
+    text shift
+  }
+  ROOMS {
+    int room_id PK
+    text name UK
+    text campus
+    int capacity
+  }
+  TEACHERS {
+    int teacher_id PK
+    text full_name
+    text title
+    text specialty
+  }
+  STUDENTS {
+    int student_id PK
+    text full_name
+    date dob
+    text phone UK
+    text email UK
+  }
+  REGISTRATIONS {
+    int registration_id PK
+    text reg_code UK
+    int student_id FK
+    int course_id FK
+    int desired_class_id FK
+    int class_id FK
+    text desired_form
+    text desired_shift
+    text status
+    text placement_note
+  }
+  PAYMENTS {
+    int payment_id PK
+    int registration_id FK,UK
+    int amount
+    text method
+    text txn_code UK
+    int collected_by FK
+  }
+  PLACEMENT_ATTEMPTS {
+    int attempt_id PK
+    int registration_id FK,UK
+    text question_ids
+    int score
+    int total
+    text level
+  }
+  PLACEMENT_QUESTIONS {
+    int question_id PK
+    text skill
+    text content
+    text options
+    int answer_index
+  }
+  APPROVAL_REQUESTS {
+    int request_id PK
+    int class_id FK
+    text status
+    text proposed_action
+    text decision
+    int decided_by FK
+    int result_class_id FK
+  }
+  STAFF_USERS {
+    int user_id PK
+    text username UK
+    text password_hash
+    text role
+  }
+  CHAT_SESSIONS {
+    text session_id PK
+    text guest_name
+    text topic
+    int consultant_id FK
+    text status
+  }
+  CHAT_MESSAGES {
+    int message_id PK
+    text session_id FK
+    text sender_type
+    text body
+  }

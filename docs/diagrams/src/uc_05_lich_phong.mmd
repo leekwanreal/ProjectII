@@ -1,0 +1,28 @@
+flowchart LR
+  GV["👤<br/>Giáo vụ"]:::actor
+  LD["👤<br/>Lãnh đạo trung tâm"]:::actor
+  subgraph S["Phân hệ Lịch học – Phòng học – Đào tạo"]
+    direction TB
+    L1(["Lập lịch học (thứ – ca)"]):::core
+    L2(["Phân phòng học (lớp Offline)"]):::core
+    L3(["Phân công giảng viên"]):::uc
+    L4(["Kiểm tra trùng phòng / giảng viên (BR-05)"]):::rule
+    L5(["Mở lớp (BR-08)"]):::uc
+    L6(["Huỷ lớp"]):::uc
+    L7(["Theo dõi danh sách học viên lớp"]):::uc
+    L8(["Xem dashboard thống kê"]):::uc
+  end
+  GV --- L1
+  GV --- L2
+  GV --- L3
+  GV --- L5
+  GV --- L6
+  GV --- L7
+  LD --- L8
+  GV --- L8
+  L1 -. "«include»" .-> L4
+  L2 -. "«include»" .-> L4
+classDef actor fill:#ffffff,stroke:#1F4E8C,stroke-width:2.5px,color:#14213D,font-weight:bold
+classDef uc fill:#EAF1FB,stroke:#1F4E8C,stroke-width:1.5px,color:#14213D
+classDef core fill:#FFF4D6,stroke:#C9A227,stroke-width:2px,color:#14213D,font-weight:bold
+classDef rule fill:#FDECEC,stroke:#B3261E,stroke-width:1.5px,color:#14213D

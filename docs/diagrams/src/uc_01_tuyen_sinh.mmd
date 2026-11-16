@@ -1,0 +1,26 @@
+flowchart LR
+  KH["👤<br/>Khách / Học viên"]:::actor
+  subgraph S["Phân hệ Quảng bá – Tra cứu – Đăng ký"]
+    direction TB
+    A1(["Xem danh mục khoá học"]):::core
+    A2(["Xem lộ trình & chuẩn đầu ra"]):::uc
+    A3(["Xem chi tiết lớp học"]):::uc
+    B1(["Tra cứu danh sách lớp"]):::core
+    B2(["Lọc theo hình thức / ca / trình độ / khai giảng"]):::uc
+    C1(["Đăng ký học trực tuyến"]):::core
+    C2(["Kiểm tra hợp lệ dữ liệu"]):::uc
+    C3(["Tra cứu hồ sơ (mã + SĐT)"]):::uc
+  end
+  KH --- A1
+  KH --- B1
+  KH --- C1
+  KH --- C3
+  A1 -. "«extend»" .-> A2
+  A3 -. "«extend»" .-> A1
+  B1 -. "«include»" .-> B2
+  A3 -. "«extend»" .-> B1
+  C1 -. "«include»" .-> C2
+classDef actor fill:#ffffff,stroke:#1F4E8C,stroke-width:2.5px,color:#14213D,font-weight:bold
+classDef uc fill:#EAF1FB,stroke:#1F4E8C,stroke-width:1.5px,color:#14213D
+classDef core fill:#FFF4D6,stroke:#C9A227,stroke-width:2px,color:#14213D,font-weight:bold
+classDef rule fill:#FDECEC,stroke:#B3261E,stroke-width:1.5px,color:#14213D

@@ -1,0 +1,26 @@
+flowchart LR
+  KH["👤<br/>Khách / Học viên"]:::actor
+  TV["👤<br/>Tư vấn viên"]:::actor
+  subgraph S["Phân hệ Tư vấn trực tuyến"]
+    direction TB
+    C1(["Mở phiên chat"]):::core
+    C2(["Gửi / nhận tin nhắn realtime"]):::core
+    C3(["Khôi phục phiên khi tải lại trang"]):::uc
+    C4(["Xem hàng đợi phiên chờ"]):::uc
+    C5(["Nhận phiên tư vấn"]):::uc
+    C6(["Kết thúc phiên"]):::uc
+    C7(["Xem lịch sử hội thoại"]):::uc
+  end
+  KH --- C1
+  KH --- C2
+  C3 -. "«extend»" .-> C1
+  TV --- C4
+  TV --- C5
+  TV --- C2
+  TV --- C6
+  TV --- C7
+  C5 -. "«include»" .-> C4
+classDef actor fill:#ffffff,stroke:#1F4E8C,stroke-width:2.5px,color:#14213D,font-weight:bold
+classDef uc fill:#EAF1FB,stroke:#1F4E8C,stroke-width:1.5px,color:#14213D
+classDef core fill:#FFF4D6,stroke:#C9A227,stroke-width:2px,color:#14213D,font-weight:bold
+classDef rule fill:#FDECEC,stroke:#B3261E,stroke-width:1.5px,color:#14213D

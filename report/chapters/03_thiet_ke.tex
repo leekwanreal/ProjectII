@@ -1,0 +1,110 @@
+\chapter{Thiết kế hệ thống}
+\label{ch:design}
+
+\section{Kiến trúc tổng thể}
+Hệ thống theo mô hình client – server ba tầng (Hình~\ref{fig:arch}). Trình duyệt chạy hai ứng dụng: \textit{Cổng học viên} và \textit{Dashboard quản trị}. Máy chủ Node.js cung cấp REST API (Express) và kênh WebSocket (Socket.IO) cho chat; toàn bộ dữ liệu lưu trong một tệp SQLite.
+\fig[0.95\linewidth]{arch_01}{Kiến trúc tổng thể và luồng giao tiếp}{fig:arch}
+
+Phía máy chủ được tổ chức phân tầng (Hình~\ref{fig:layers}): tầng \textbf{routes} chỉ nhận yêu cầu và trả kết quả; tầng \textbf{services} điều phối truy cập CSDL và giao dịch; tầng \textbf{domain} (\texttt{rules.js}) chứa các quy tắc nghiệp vụ dưới dạng \emph{hàm thuần} – không đọc/ghi CSDL – nên có thể kiểm thử độc lập và dùng chung cho mọi luồng (API, socket, dữ liệu mẫu).
+\fig[0.8\linewidth]{cls_02_layers}{Biểu đồ lớp thiết kế phân tầng phía máy chủ}{fig:layers}
+
+\section{Biểu đồ hoạt động}
+Các biểu đồ hoạt động dùng làn (swimlane) để phân định trách nhiệm giữa tác nhân và hệ thống.
+\fig[0.92\linewidth]{act_01_dangky_thuphi_thi}{Hoạt động: Đăng ký – Thu học phí – Kiểm tra đầu vào}{fig:act1}
+Hình~\ref{fig:act1} cho thấy điểm kiểm soát BR-01: nhánh “Hồ sơ đã PAID?” nằm trong làn hệ thống, nên kể cả khi người dùng gọi API trực tiếp (bỏ qua giao diện) cũng không thể làm bài khi chưa nộp phí.
+\fig[0.92\linewidth]{act_02_xeplop_pheduyet}{Hoạt động: Xếp lớp và xử lý vượt sĩ số}{fig:act2}
+Trong Hình~\ref{fig:act2}, lớp Online và Offline đi theo hai nhánh khác nhau: lớp Online đầy thì từ chối và yêu cầu chọn lớp khác, còn lớp Offline đủ 30 thì chuyển sang luồng tờ trình cho Lãnh đạo – đúng tinh thần đề bài “quyết định tách lớp thuộc quyền Lãnh đạo”.
+\fig[0.85\linewidth]{act_03_chat}{Hoạt động: Tư vấn trực tuyến}{fig:act3}
+\fig[0.95\linewidth]{act_04_tracuu}{Hoạt động: Tra cứu danh sách lớp}{fig:act4}
+
+\section{Biểu đồ tuần tự}
+\fig[0.95\linewidth]{seq_01_dangky}{Tuần tự: Đăng ký, thanh toán và làm bài kiểm tra}{fig:seq1}
+\fig[0.95\linewidth]{seq_02_tracuu}{Tuần tự: Tra cứu danh sách lớp}{fig:seq2}
+\fig[0.95\linewidth]{seq_03_chat}{Tuần tự: Chat tư vấn thời gian thực qua Socket.IO}{fig:seq3}
+\fig[0.95\linewidth]{seq_04_xeplop_pheduyet}{Tuần tự: Xếp lớp và phê duyệt tờ trình}{fig:seq4}
+
+\section{Biểu đồ trạng thái}
+Hệ thống tách bạch hai loại trạng thái của lớp học:
+\begin{itemize}
+  \item \textbf{Trạng thái vòng đời} được lưu trong CSDL: \texttt{RECRUITING}, \texttt{IN\_PROGRESS}, \texttt{COMPLETED}, \texttt{CANCELLED}. Chỉ thay đổi bằng thao tác có chủ đích (mở lớp, kết thúc, huỷ).
+  \item \textbf{Trạng thái sĩ số} được \emph{tính toán} mỗi lần đọc từ sĩ số và số hồ sơ chờ: \texttt{BELOW\_MIN}, \texttt{ELIGIBLE}, \texttt{FULL}, \texttt{PENDING\_APPROVAL}, \texttt{OVER\_CAPACITY} (các trạng thái con trong Hình~\ref{fig:st1}). Nhờ vậy không bao giờ xảy ra tình huống “lớp ghi là đủ điều kiện mở nhưng thực tế đã có học viên rút”.
+\end{itemize}
+\fig[0.98\linewidth]{st_01_lop}{Biểu đồ trạng thái của Lớp học}{fig:st1}
+\fig[0.98\linewidth]{st_02_hoso}{Biểu đồ trạng thái của Hồ sơ đăng ký}{fig:st2}
+\fig[0.8\linewidth]{st_03_chat}{Biểu đồ trạng thái của Phiên tư vấn}{fig:st3}
+Ràng buộc giữa trạng thái hồ sơ và lớp được cưỡng chế ở mức CSDL: hồ sơ có \texttt{class\_id} khác rỗng \emph{khi và chỉ khi} ở trạng thái \texttt{ENROLLED} hoặc \texttt{WAITING\_APPROVAL}.
+
+\section{Biểu đồ lớp miền nghiệp vụ}
+\fig[0.98\linewidth]{cls_01_domain}{Biểu đồ lớp miền nghiệp vụ}{fig:domain}
+Lớp \texttt{Class} có các phương thức \texttt{minSize()}, \texttt{maxSize()}, \texttt{capacityState()}, \texttt{canOpen()} – trong cài đặt, các phương thức này được hiện thực bởi các hàm thuần trong \texttt{rules.js}. Quan hệ tự thân “tách từ” (\texttt{parent\_class\_id}) cho phép truy vết lớp mới sinh ra từ quyết định tách lớp của Lãnh đạo.
+
+\section{Thiết kế cơ sở dữ liệu}
+\subsection{Lược đồ thực thể – liên kết}
+\fig[0.98\linewidth]{erd_01}{Lược đồ ERD – 14 bảng}{fig:erd}
+
+\subsection{Từ điển dữ liệu các bảng chính}
+\begin{xltabular}{\linewidth}{|L{3.4cm}|L{3.2cm}|Y|}
+  \caption{Từ điển dữ liệu (rút gọn)}\label{tab:dict}\\ \hline
+  \headrow \hd{Bảng} & \hd{Cột chính} & \hd{Ràng buộc / ý nghĩa} \\ \hline
+  \endfirsthead \hline
+  \headrow \hd{Bảng} & \hd{Cột chính} & \hd{Ràng buộc / ý nghĩa} \\ \hline
+  \endhead
+  \texttt{courses} & code, certificate, target, tuition\_fee, syllabus & \texttt{code} duy nhất; \texttt{certificate} $\in$ \{IELTS, TOEIC, VSTEP, CAMBRIDGE\}; lộ trình lưu JSON \\ \hline
+  \texttt{classes} & code, course\_id, level, form, start/end\_date, teacher\_id, room\_id, status, parent\_class\_id & \texttt{form} $\in$ \{ONLINE, OFFLINE\}; \texttt{CHECK(end\_date > start\_date)}; \texttt{CHECK(form = 'OFFLINE' OR room\_id IS NULL)} – lớp online không có phòng \\ \hline
+  \texttt{class\_schedules} & class\_id, weekday (2–8), shift & \texttt{UNIQUE(class\_id, weekday, shift)}; ca $\in$ \{MORNING, AFTERNOON, EVENING\} \\ \hline
+  \texttt{rooms}, \texttt{teachers} & capacity, campus / title, specialty & \texttt{capacity > 0} \\ \hline
+  \texttt{students} & full\_name, dob, phone, email & \texttt{phone}, \texttt{email} duy nhất – tái sử dụng học viên cũ \\ \hline
+  \texttt{registrations} & reg\_code, student\_id, course\_id, desired\_*, class\_id, status, placement\_note & 6 trạng thái; \texttt{CHECK((status IN ('ENROLLED','WAITING\_APPROVAL')) = (class\_id IS NOT NULL))}; chỉ mục duy nhất có điều kiện: một hồ sơ hiệu lực / học viên / khoá \\ \hline
+  \texttt{payments} & registration\_id, amount, method, txn\_code, collected\_by & \texttt{registration\_id} duy nhất (mỗi hồ sơ thanh toán 1 lần); \texttt{txn\_code} duy nhất \\ \hline
+  \texttt{placement\_questions} & skill, difficulty, options, answer\_index & 5 mức độ khó; đáp án không bao giờ gửi ra trình duyệt \\ \hline
+  \texttt{placement\_attempts} & registration\_id, question\_ids, score, level, started/submitted\_at & \texttt{registration\_id} duy nhất (thi 1 lần); lưu đề đã phát \\ \hline
+  \texttt{approval\_requests} & class\_id, status, proposed\_action, decision, decided\_by, result\_class\_id & Chỉ mục duy nhất có điều kiện \texttt{WHERE status = 'PENDING'}: một tờ trình chờ / lớp \\ \hline
+  \texttt{staff\_users} & username, password\_hash, role & role $\in$ \{CONSULTANT, ACADEMIC, DIRECTOR\}; mật khẩu băm scrypt + salt \\ \hline
+  \texttt{chat\_sessions}, \texttt{chat\_messages} & session\_id (UUID), status, consultant\_id / sender\_type, body & \texttt{body} 1–2000 ký tự; xoá phiên thì xoá tin nhắn (\texttt{ON DELETE CASCADE}) \\ \hline
+\end{xltabular}
+
+\subsection{Sĩ số là giá trị tính toán}
+Thay vì lưu cột \texttt{current\_enrolled} trong bảng \texttt{classes} (dễ lệch khi có lỗi giữa chừng), sĩ số được tính qua view:
+\begin{lstlisting}[language=SQLx,caption={View tính sĩ số và hồ sơ chờ duyệt của từng lớp},label=lst:view]
+CREATE VIEW v_class_enrollment AS
+SELECT c.class_id,
+  (SELECT COUNT(*) FROM registrations r
+    WHERE r.class_id = c.class_id AND r.status = 'ENROLLED')         AS enrolled,
+  (SELECT COUNT(*) FROM registrations r
+    WHERE r.class_id = c.class_id AND r.status = 'WAITING_APPROVAL') AS waiting
+FROM classes c;
+\end{lstlisting}
+Kết hợp chỉ mục \texttt{ix\_reg\_class\_status(class\_id, status)}, truy vấn này vẫn nhanh với quy mô một trung tâm (hàng nghìn hồ sơ).
+
+\section{Thiết kế API}
+\begin{xltabular}{\linewidth}{|l|L{6.3cm}|Y|}
+  \caption{Các API chính}\label{tab:api}\\ \hline
+  \headrow \hd{Phương thức} & \hd{Đường dẫn} & \hd{Chức năng – quyền} \\ \hline
+  \endfirsthead \hline
+  \headrow \hd{Phương thức} & \hd{Đường dẫn} & \hd{Chức năng – quyền} \\ \hline
+  \endhead
+  GET & \texttt{/api/courses}, \texttt{/api/courses/:id} & CN1 – danh mục, chi tiết khoá + lớp (công khai) \\ \hline
+  GET & \texttt{/api/classes?q\&certificate\&form\&shift\&level\&from\&available} & CN3 – tra cứu lớp (công khai) \\ \hline
+  POST & \texttt{/api/registrations} & CN2 – đăng ký (công khai) \\ \hline
+  POST & \texttt{/api/registrations/lookup} & Tra cứu hồ sơ bằng mã + SĐT \\ \hline
+  POST & \texttt{/api/registrations/:code/pay} & Thanh toán trực tuyến (mô phỏng) \\ \hline
+  POST & \texttt{/api/placement/:code/start}, \texttt{/submit} & Làm bài / nộp bài kiểm tra (BR-01) \\ \hline
+  POST & \texttt{/api/auth/login} & Đăng nhập nhân viên, trả token \\ \hline
+  GET & \texttt{/api/admin/dashboard} & Số liệu tổng hợp – mọi nhân viên \\ \hline
+  GET & \texttt{/api/admin/registrations/:id/suggestions} & Gợi ý lớp – Giáo vụ, Lãnh đạo \\ \hline
+  POST & \texttt{/api/admin/registrations/:id/enroll} & Xếp lớp (BR-04, BR-06) – Giáo vụ, Lãnh đạo \\ \hline
+  POST & \texttt{/api/admin/registrations/:id/cash-payment} & Thu tiền mặt – Giáo vụ, Lãnh đạo \\ \hline
+  POST/PUT & \texttt{/api/admin/classes}, \texttt{/:id/arrangement} & Tạo lớp, lập lịch – phân phòng (BR-05) \\ \hline
+  POST & \texttt{/api/admin/classes/:id/open|cancel|complete} & Mở / huỷ / kết thúc lớp (BR-08) \\ \hline
+  GET & \texttt{/api/admin/approvals} & Danh sách tờ trình kèm phương án đề xuất \\ \hline
+  POST & \texttt{/api/admin/approvals/:id/decide} & Ra quyết định – \textbf{chỉ Lãnh đạo} \\ \hline
+  GET & \texttt{/api/admin/chat/sessions[/:id/messages]} & Lịch sử chat – nhân viên \\ \hline
+\end{xltabular}
+Mã lỗi HTTP được dùng nhất quán: 400 dữ liệu sai, 401 chưa đăng nhập, 403 không đủ quyền hoặc vi phạm BR-01, 404 không tìm thấy, 409 xung đột trạng thái (trùng hồ sơ, đã thanh toán, tờ trình đã xử lý), 410 hết giờ làm bài, 422 vi phạm quy tắc nghiệp vụ (lệch trình độ, trùng lịch, chưa đủ điều kiện mở lớp).
+
+\section{Thiết kế giao diện}
+\begin{itemize}
+  \item \textbf{Cổng học viên} là trang đơn gồm các khu vực: giới thiệu và quy định mở lớp, danh mục khoá học (CN1), tra cứu lớp (CN3), form đăng ký (CN2), cửa sổ tra cứu hồ sơ – thanh toán – làm bài, và widget chat nổi ở góc màn hình (CN4).
+  \item \textbf{Dashboard quản trị} có thanh điều hướng bên trái với 5 mục: Tổng quan, Hồ sơ \& xếp lớp, Lớp học \& lịch, Phê duyệt sĩ số, Tư vấn trực tuyến; huy hiệu đỏ báo số việc đang chờ (cập nhật realtime).
+  \item Màu sắc nhất quán cho trạng thái sĩ số: vàng – chưa đủ ngưỡng, xanh lá – đủ điều kiện mở, xanh dương – đủ 30, đỏ – chờ Lãnh đạo duyệt. Thanh sĩ số có vạch đánh dấu ngưỡng mở lớp (10 hoặc 20) giúp nhìn là biết lớp còn thiếu bao nhiêu học viên.
+\end{itemize}

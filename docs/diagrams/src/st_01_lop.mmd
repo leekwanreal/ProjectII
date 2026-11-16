@@ -1,0 +1,17 @@
+stateDiagram-v2
+  direction LR
+  [*] --> RECRUITING: Giáo vụ tạo lớp
+  state RECRUITING {
+    direction LR
+    BELOW_MIN --> ELIGIBLE: sĩ số ≥ 10 (Online) / 20 (Offline)
+    ELIGIBLE --> BELOW_MIN: lớp khác nhận lại HV
+    ELIGIBLE --> FULL: Offline đạt 30
+    FULL --> PENDING_APPROVAL: xếp thêm HV (BR-04)
+    PENDING_APPROVAL --> FULL: Tách lớp / Từ chối
+    PENDING_APPROVAL --> OVER_CAPACITY: Giữ ngoại lệ
+  }
+  RECRUITING --> IN_PROGRESS: Mở lớp [đủ ngưỡng, có phòng, không chờ duyệt]
+  RECRUITING --> CANCELLED: Huỷ lớp
+  IN_PROGRESS --> COMPLETED: Kết thúc khoá
+  CANCELLED --> [*]
+  COMPLETED --> [*]

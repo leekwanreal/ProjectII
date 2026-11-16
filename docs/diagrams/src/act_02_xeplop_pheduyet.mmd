@@ -1,0 +1,47 @@
+flowchart TB
+  subgraph L1["👤 Giáo vụ"]
+    direction TB
+    S((" ")):::start
+    A1["Chọn hồ sơ TESTED"]:::act
+    A3["Chọn lớp từ danh sách gợi ý"]:::act
+    A4["Nhập lý do lệch trình độ"]:::act
+  end
+  subgraph L2["🖥 Hệ thống"]
+    direction TB
+    B1["Gợi ý lớp: cùng khoá, đúng CEFR,<br/>ưu tiên hình thức / ca"]:::act
+    B2{"Trình độ lớp = trình độ HV?"}:::dec
+    B3{"Hình thức lớp?"}:::dec
+    B4{"Sĩ số < tối đa online?"}:::dec
+    B5{"Sĩ số Offline < 30?"}:::dec
+    B6["Hồ sơ → ENROLLED"]:::good
+    B7["Từ chối: lớp online đã đầy"]:::bad
+    B8["Hồ sơ → WAITING_APPROVAL,<br/>tạo / bổ sung tờ trình (BR-04)"]:::bad
+    B9["Tính phương án đề xuất:<br/>30 + k ≥ 40 → chia đều<br/>ngược lại → tách phần dư"]:::act
+    B10["Thực thi quyết định<br/>trong 1 transaction"]:::good
+  end
+  subgraph L3["👤 Lãnh đạo trung tâm"]
+    direction TB
+    C1{"Quyết định"}:::dec
+    C2["Tách lớp"]:::act
+    C3["Giữ ngoại lệ<br/>(≤ sức chứa phòng)"]:::act
+    C4["Từ chối → hồ sơ về TESTED"]:::act
+  end
+  E((" ")):::start
+  S --> A1 --> B1 --> A3 --> B2
+  B2 -- "Không" --> A4 --> B3
+  B2 -- "Có" --> B3
+  B3 -- "Online" --> B4
+  B4 -- "Có" --> B6
+  B4 -- "Không" --> B7 --> A3
+  B3 -- "Offline" --> B5
+  B5 -- "Có" --> B6 --> E
+  B5 -- "Không" --> B8 --> B9 --> C1
+  C1 --> C2 --> B10
+  C1 --> C3 --> B10
+  C1 --> C4 --> B10
+  B10 --> E
+classDef start fill:#14213D,stroke:#14213D,color:#fff
+classDef act fill:#EAF1FB,stroke:#1F4E8C,stroke-width:1.5px,color:#14213D
+classDef dec fill:#FFF4D6,stroke:#C9A227,stroke-width:2px,color:#14213D
+classDef bad fill:#FDECEC,stroke:#B3261E,stroke-width:1.5px,color:#14213D
+classDef good fill:#E6F4EA,stroke:#2E7D32,stroke-width:1.5px,color:#14213D

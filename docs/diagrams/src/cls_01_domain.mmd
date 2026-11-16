@@ -1,0 +1,111 @@
+classDiagram
+  direction TB
+  class Course {
+    +id: int
+    +code: string
+    +name: string
+    +certificate: string
+    +target: string
+    +totalHours: int
+    +tuitionFee: number
+    +outcomes: string
+    +syllabus: string[]
+  }
+  class Clazz["Class (Lớp học)"] {
+    +id: int
+    +code: string
+    +level: CEFR
+    +form: ONLINE|OFFLINE
+    +startDate: date
+    +endDate: date
+    +status: ClassStatus
+    +minSize() int
+    +maxSize() int
+    +enrolled() int
+    +capacityState() CapacityState
+    +canOpen() bool
+  }
+  class Schedule {
+    +weekday: 2..8
+    +shift: MORNING|AFTERNOON|EVENING
+  }
+  class Room {
+    +name: string
+    +campus: string
+    +capacity: int
+  }
+  class Teacher {
+    +fullName: string
+    +title: string
+    +specialty: string
+  }
+  class Student {
+    +fullName: string
+    +dob: date
+    +phone: string
+    +email: string
+  }
+  class Registration {
+    +regCode: string
+    +desiredForm: string
+    +desiredShift: string
+    +status: RegStatus
+    +pay(method)
+    +enroll(classId)
+  }
+  class Payment {
+    +amount: number
+    +method: string
+    +txnCode: string
+    +paidAt: datetime
+  }
+  class PlacementAttempt {
+    +questionIds: int[]
+    +score: int
+    +total: int
+    +level: CEFR
+    +submit(answers)
+  }
+  class PlacementQuestion {
+    +skill: string
+    +content: string
+    +options: string[]
+    +answerIndex: int
+  }
+  class ApprovalRequest {
+    +status: PENDING|APPROVED|REJECTED
+    +proposedAction: string
+    +decision: SPLIT|KEEP|REJECT
+    +decide(decision, note)
+  }
+  class StaffUser {
+    +username: string
+    +fullName: string
+    +role: CONSULTANT|ACADEMIC|DIRECTOR
+  }
+  class ChatSession {
+    +id: uuid
+    +guestName: string
+    +topic: string
+    +status: WAITING|ACTIVE|CLOSED
+  }
+  class ChatMessage {
+    +senderType: STUDENT|CONSULTANT|SYSTEM
+    +body: string
+    +sentAt: datetime
+  }
+  Course "1" --> "0..*" Clazz : mở
+  Clazz "1" *-- "1..*" Schedule : lịch học
+  Clazz "0..*" --> "0..1" Room : học tại
+  Clazz "0..*" --> "1" Teacher : giảng dạy
+  Clazz "0..1" --> "0..*" Clazz : tách từ
+  Student "1" --> "0..*" Registration : nộp
+  Registration "0..*" --> "1" Course : đăng ký
+  Registration "0..*" --> "0..1" Clazz : được xếp vào
+  Registration "1" --> "0..1" Payment : thanh toán
+  Registration "1" --> "0..1" PlacementAttempt : thi đầu vào
+  PlacementAttempt "0..*" ..> "20" PlacementQuestion : gồm
+  ApprovalRequest "0..*" --> "1" Clazz : về lớp
+  ApprovalRequest "0..*" --> "0..1" StaffUser : duyệt bởi
+  ChatSession "1" *-- "0..*" ChatMessage
+  ChatSession "0..*" --> "0..1" StaffUser : tư vấn viên

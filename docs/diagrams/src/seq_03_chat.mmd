@@ -1,0 +1,31 @@
+sequenceDiagram
+  autonumber
+  actor KH as Khách
+  participant W as Widget chat
+  participant IO as Socket.IO server
+  participant DB as SQLite
+  participant C as Console tư vấn
+  actor TV as Tư vấn viên
+  TV->>C: Đăng nhập (vai trò CONSULTANT)
+  C->>IO: connect(auth.token), join phòng consultants
+  KH->>W: Nhập tên, liên hệ, chủ đề
+  W->>IO: chat:start
+  IO->>DB: INSERT chat_sessions (WAITING)
+  IO-->>W: chat:session {sessionId}
+  IO-->>C: queue:update
+  TV->>C: Nhận phiên
+  C->>IO: chat:claim {sessionId}
+  IO->>DB: UPDATE status = ACTIVE, consultant_id
+  IO-->>W: chat:message (hệ thống: tư vấn viên đã tham gia)
+  loop Hội thoại
+    W->>IO: chat:message {body}
+    IO->>DB: INSERT chat_messages
+    IO-->>C: chat:message
+    C->>IO: chat:message {body}
+    IO->>DB: INSERT chat_messages
+    IO-->>W: chat:message
+  end
+  C->>IO: chat:close
+  IO->>DB: UPDATE status = CLOSED, closed_at
+  IO-->>W: chat:closed
+  IO-->>C: queue:update

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Văn phòng LinguaPro – Dashboard quản trị</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%2314213d'/><text x='32' y='44' font-size='34' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>L</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <!-- Đăng nhập -->
+  <div class="login hidden" id="login">
+    <form class="card login-card" id="login-form">
+      <div class="brand-row"><span class="logo">L</span><div><b>LinguaPro</b><small>Văn phòng trung tâm</small></div></div>
+      <h2>Đăng nhập</h2>
+      <p class="muted small">Dành cho tư vấn viên, giáo vụ và lãnh đạo trung tâm.</p>
+      <div class="field"><label for="lg-user">Tên đăng nhập</label><input class="input" id="lg-user" name="username" autocomplete="username" required></div>
+      <div class="field" style="margin-top:12px"><label for="lg-pass">Mật khẩu</label><input class="input" id="lg-pass" name="password" type="password" autocomplete="current-password" required></div>
+      <div class="err" id="lg-err" style="margin-top:8px"></div>
+      <button class="btn btn-navy btn-block btn-lg" style="margin-top:8px">Đăng nhập</button>
+      <div class="demo-acc">
+        <div class="tiny">Tài khoản demo (mật khẩu <span class="mono">123456</span>) – bấm để điền:</div>
+        <div class="chips" style="margin-top:8px">
+          <button type="button" class="chip" data-u="giaovu">giaovu · Giáo vụ</button>
+          <button type="button" class="chip" data-u="lanhdao">lanhdao · Lãnh đạo</button>
+          <button type="button" class="chip" data-u="tuvan1">tuvan1 · Tư vấn</button>
+        </div>
+      </div>
+      <a class="small" href="/" style="display:block;margin-top:16px">← Về cổng học viên</a>
+    </form>
+  </div>
+
+  <!-- Ứng dụng -->
+  <div class="app hidden" id="app">
+    <aside class="side" id="side">
+      <div class="brand-row"><span class="logo">L</span><div><b>LinguaPro</b><small>Văn phòng trung tâm</small></div></div>
+      <nav class="menu" id="menu">
+        <a href="#dashboard" data-view="dashboard"><i>▦</i>Tổng quan</a>
+        <a href="#registrations" data-view="registrations"><i>☰</i>Hồ sơ & xếp lớp<span class="cnt" id="cnt-place"></span></a>
+        <a href="#classes" data-view="classes"><i>▣</i>Lớp học & lịch</a>
+        <a href="#approvals" data-view="approvals"><i>✓</i>Phê duyệt sĩ số<span class="cnt red" id="cnt-approve"></span></a>
+        <a href="#chat" data-view="chat"><i>✉</i>Tư vấn trực tuyến<span class="cnt red" id="cnt-chat"></span></a>
+      </nav>
+      <div class="side-foot">
+        <div class="me-box"><div class="avatar" id="me-av">?</div><div><b id="me-name"></b><small id="me-role"></small></div></div>
+        <button class="btn btn-ghost btn-sm btn-block" id="logout">Đăng xuất</button>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="main-head">
+        <button class="burger" id="burger" aria-label="Menu">☰</button>
+        <div><h1 id="view-title">Tổng quan</h1><div class="muted small" id="view-sub"></div></div>
+        <div class="spacer"></div>
+        <button class="theme-btn" data-action="theme" title="Chuyển chế độ sáng / tối" aria-label="Chuyển chế độ sáng / tối">🌙</button>
+        <span class="live" id="live"><span></span>Realtime</span>
+        <a class="btn btn-outline btn-sm" href="/" target="_blank">Cổng học viên ↗</a>
+      </header>
+      <section class="view" id="view"></section>
+    </main>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/vendor/chart.umd.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

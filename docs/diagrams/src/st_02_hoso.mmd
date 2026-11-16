@@ -1,0 +1,13 @@
+stateDiagram-v2
+  direction LR
+  [*] --> PENDING_PAYMENT: Gửi form đăng ký
+  PENDING_PAYMENT --> PAID: Thanh toán thành công
+  PENDING_PAYMENT --> CANCELLED: Huỷ hồ sơ
+  PAID --> TESTED: Nộp bài kiểm tra đầu vào
+  TESTED --> ENROLLED: Xếp lớp (còn chỗ)
+  TESTED --> WAITING_APPROVAL: Lớp Offline đã đủ 30
+  WAITING_APPROVAL --> ENROLLED: Lãnh đạo duyệt
+  WAITING_APPROVAL --> TESTED: Lãnh đạo từ chối
+  ENROLLED --> TESTED: Lớp bị huỷ
+  ENROLLED --> [*]
+  CANCELLED --> [*]

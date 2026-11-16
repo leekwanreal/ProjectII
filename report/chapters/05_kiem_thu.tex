@@ -1,0 +1,84 @@
+\chapter{Kiểm thử}
+\label{ch:test}
+
+\section{Chiến lược kiểm thử}
+Hệ thống được kiểm thử tự động ở ba mức, chạy bằng một lệnh \texttt{npm test}:
+\begin{itemize}
+  \item \textbf{Kiểm thử đơn vị} (\texttt{tests/rules.test.js}, 36 ca): kiểm tra các hàm thuần của bộ quy tắc nghiệp vụ, tập trung vào \emph{giá trị biên}: 9/10 học viên (online), 19/20 và 30/31 (offline), 39/40 (chia đều), các mốc quy đổi điểm CEFR.
+  \item \textbf{Kiểm thử tích hợp API} (\texttt{tests/api.test.js}, 29 ca): khởi động máy chủ thật trên cổng ngẫu nhiên với \emph{CSDL tạm riêng} được nạp dữ liệu mẫu, gọi HTTP như trình duyệt, đi hết luồng đăng ký → thanh toán → thi → xếp lớp → tờ trình → phê duyệt → lập lịch → mở/huỷ lớp, đồng thời kiểm tra phân quyền.
+  \item \textbf{Kiểm thử thời gian thực} (\texttt{tests/chat.test.js}, 7 ca): ba client Socket.IO (một khách, hai tư vấn viên) kiểm tra hàng đợi, nhận phiên tranh chấp, nhắn tin hai chiều, khôi phục phiên, chặn socket lạ, đóng phiên.
+\end{itemize}
+Mỗi tệp kiểm thử dùng CSDL riêng trong thư mục tạm nên kết quả lặp lại được và không ảnh hưởng dữ liệu demo.
+
+\section{Các ca kiểm thử tiêu biểu}
+\begin{xltabular}{\linewidth}{|l|L{5.4cm}|Y|c|}
+  \caption{Ca kiểm thử tiêu biểu và kết quả}\label{tab:tc}\\ \hline
+  \headrow \hd{Mã} & \hd{Kịch bản} & \hd{Kết quả mong đợi} & \hd{KQ} \\ \hline
+  \endfirsthead \hline
+  \headrow \hd{Mã} & \hd{Kịch bản} & \hd{Kết quả mong đợi} & \hd{KQ} \\ \hline
+  \endhead
+  TC-01 & Lớp Online 9 / 10 học viên & BELOW\_MIN (thiếu 1) / ELIGIBLE & Đạt \\ \hline
+  TC-02 & Lớp Offline 19, 20, 30, 31 học viên & BELOW\_MIN, ELIGIBLE, FULL, OVER\_CAPACITY & Đạt \\ \hline
+  TC-03 & Xếp học viên thứ 30 / thứ 31 vào lớp Offline & ENROLLED / NEEDS\_APPROVAL & Đạt \\ \hline
+  TC-04 & Xếp vào lớp Online đã đủ 40 & REJECT – ONLINE\_FULL, không lập tờ trình & Đạt \\ \hline
+  TC-05 & Tờ trình 30 + 3, phòng 40 chỗ & Đề xuất KEEP; SPLIT dạng REMAINDER [30, 3] & Đạt \\ \hline
+  TC-06 & Tờ trình 30 + 3, phòng 30 chỗ & KEEP không khả thi, đề xuất SPLIT & Đạt \\ \hline
+  TC-07 & Tờ trình 30 + 10 & SPLIT dạng EVEN [20, 20] & Đạt \\ \hline
+  TC-08 & Trùng phòng / trùng giảng viên cùng thứ – ca – thời gian & Phát hiện xung đột ROOM / TEACHER & Đạt \\ \hline
+  TC-09 & Đăng ký hợp lệ & 201, mã \texttt{DK-YYYY-NNNN}, PENDING\_PAYMENT & Đạt \\ \hline
+  TC-10 & Đăng ký trùng khoá; dữ liệu sai & 409; 400 kèm lỗi từng trường & Đạt \\ \hline
+  TC-11 & Tra cứu hồ sơ đúng mã, sai SĐT & 404 & Đạt \\ \hline
+  TC-12 & Làm bài khi chưa nộp học phí & 403 PAYMENT\_REQUIRED (BR-01) & Đạt \\ \hline
+  TC-13 & Thanh toán 2 lần & Lần 2 trả 409 & Đạt \\ \hline
+  TC-14 & Làm bài: trả lời đúng 15/20 & 20 câu không lộ đáp án; điểm 15, trình độ B2; hồ sơ TESTED & Đạt \\ \hline
+  TC-15 & Gọi API quản trị không token; tư vấn viên xếp lớp & 401; 403 & Đạt \\ \hline
+  TC-16 & Tham số tra cứu \verb|' OR 1=1 --| & 200, danh sách rỗng, không lỗi SQL & Đạt \\ \hline
+  TC-17 & Giáo vụ ra quyết định tờ trình & 403 – chỉ Lãnh đạo & Đạt \\ \hline
+  TC-18 & Lãnh đạo giữ ngoại lệ (hội trường 45 chỗ) & Lớp có 31 học viên, không còn hồ sơ chờ & Đạt \\ \hline
+  TC-19 & Lãnh đạo tách lớp 30 + 12 = 42 & Hai lớp 21 + 21; lớp mới có \texttt{parent\_class\_id}, được gợi ý phòng trống & Đạt \\ \hline
+  TC-20 & Từ chối tờ trình & Hồ sơ chờ trở về TESTED & Đạt \\ \hline
+  TC-21 & Mở lớp Offline 21 HV chưa có phòng & 422 – “chưa được phân phòng học” & Đạt \\ \hline
+  TC-22 & Gán phòng đang bận cùng ca & 422 SCHEDULE\_CONFLICT & Đạt \\ \hline
+  TC-23 & Gán phòng trống rồi mở lớp & IN\_PROGRESS & Đạt \\ \hline
+  TC-24 & Huỷ lớp & Toàn bộ học viên trở về danh sách chờ xếp lớp & Đạt \\ \hline
+  TC-25 & Hai tư vấn viên cùng nhận một phiên & Người thứ hai bị từ chối & Đạt \\ \hline
+  TC-26 & Tin nhắn hai chiều realtime & Bên kia nhận đúng nội dung, đúng người gửi & Đạt \\ \hline
+  TC-27 & Socket lạ gửi tin vào phiên người khác & Bị từ chối & Đạt \\ \hline
+  TC-28 & Đóng phiên rồi gửi tiếp & Bị từ chối; tin nhắn đã lưu CSDL & Đạt \\ \hline
+\end{xltabular}
+
+\section{Kết quả chạy kiểm thử}
+\begin{figure}[H]
+\begin{PlainCode}
+> node --test --test-reporter=spec "tests/*.test.js"
+> BR-04 – phương án xử lý tờ trình
+  v 30 + 3 = 33 < 40, phòng 40 chỗ -> đề xuất giữ ngoại lệ, tách phần dư
+  v 30 + 3 nhưng phòng chỉ 30 chỗ -> không giữ được, đề xuất tách
+  v 30 + 10 = 40 -> chia đều 20/20 (cả 2 lớp đủ điều kiện mở)
+  ...
+> Xếp lớp & tờ trình vượt sĩ số (BR-04)
+  v Học viên thứ 30 vào lớp offline -> ENROLLED; thứ 31 -> chờ duyệt + tờ trình
+  v Lãnh đạo "tách lớp" 30 + 12 = 42 -> chia đều 21 / 21, lớp mới có lịch + phòng
+  ...
+i tests 72
+i suites 12
+i pass 72
+i fail 0
+\end{PlainCode}
+\captionof{lstlisting}{Kết quả \texttt{npm test} (rút gọn)}\label{lst:testout}
+\end{figure}
+
+\begin{table}[H]\centering
+\caption{Tổng hợp kết quả kiểm thử tự động}\label{tab:testsum}
+\begin{tabular}{|l|c|c|c|}
+  \hline
+  \headrow \hd{Tệp kiểm thử} & \hd{Số ca} & \hd{Đạt} & \hd{Thời gian} \\ \hline
+  \texttt{rules.test.js} – quy tắc nghiệp vụ & 36 & 36 & $\approx$ 0,1 s \\ \hline
+  \texttt{api.test.js} – tích hợp REST API & 29 & 29 & $\approx$ 1,2 s \\ \hline
+  \texttt{chat.test.js} – Socket.IO & 7 & 7 & $\approx$ 1,1 s \\ \hline
+  \textbf{Tổng} & \textbf{72} & \textbf{72 (100\%)} & \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Kiểm thử giao diện}
+Ngoài kiểm thử tự động, toàn bộ giao diện được chạy thử trên trình duyệt Chrome (độ phân giải 1440×900 và giả lập điện thoại 390×844) bằng công cụ \texttt{tools/screenshots.js}: công cụ tự đăng nhập từng vai trò, đi qua các màn hình, gõ tin nhắn chat ở cả hai phía và chụp ảnh – các ảnh trong Chương~\ref{ch:impl} được tạo ra từ kịch bản này. Quá trình chạy thử đã giúp phát hiện và sửa các lỗi: đường dẫn thư viện Chart.js bị chặn bởi trường \texttt{exports} của gói; xung đột tên lớp CSS giữa khối người dùng và bong bóng tin nhắn; lớp đang học bị gợi ý ưu tiên cho học viên mới (đã bổ sung trọng số giảm cho lớp đã khai giảng).

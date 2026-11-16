@@ -1,0 +1,24 @@
+sequenceDiagram
+  autonumber
+  actor KH as Khách
+  participant UI as Trang tra cứu lớp
+  participant API as Class API
+  participant SV as ClassService
+  participant R as rules.js
+  participant DB as SQLite
+  KH->>UI: Chọn bộ lọc (hình thức, ca, trình độ, khai giảng...)
+  UI->>API: GET /api/classes?form=OFFLINE&shift=EVENING&level=B1
+  API->>SV: search(filters)
+  SV->>DB: SELECT lớp JOIN khoá, giảng viên, phòng, v_class_enrollment
+  DB-->>SV: Danh sách lớp + sĩ số
+  loop Mỗi lớp
+    SV->>R: evaluateClass(form, enrolled, waiting)
+    R-->>SV: capacityState, canOpen, seatsLeft
+  end
+  SV-->>API: Kết quả đã tính trạng thái
+  API-->>UI: 200 JSON
+  alt Có kết quả
+    UI-->>KH: Thẻ lớp + badge trạng thái sĩ số
+  else Rỗng
+    UI-->>KH: Không có lớp phù hợp, gợi ý xoá bộ lọc
+  end

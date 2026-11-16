@@ -1,0 +1,24 @@
+flowchart LR
+  subgraph Client["Máy người dùng (Trình duyệt)"]
+    direction TB
+    P["Cổng học viên<br/>index.html + portal.js"]
+    A["Dashboard quản trị<br/>admin.html + admin.js + Chart.js"]
+  end
+  subgraph Server["Máy chủ Node.js 24"]
+    direction TB
+    EX["Express 5<br/>REST API + static"]
+    IO["Socket.IO 4<br/>chat realtime"]
+    MW["Middleware: JSON, auth token (HMAC),<br/>phân quyền theo vai trò, xử lý lỗi"]
+    SV["Services<br/>Catalog · Registration · Placement<br/>Enrollment · Schedule · Chat · Stats"]
+    RU["domain/rules.js<br/>Business Rules BR-01..BR-08"]
+  end
+  DB[("SQLite<br/>database.sqlite<br/>14 bảng + 1 view")]
+  P -- "HTTP / JSON" --> EX
+  A -- "HTTP / JSON + Bearer token" --> EX
+  P <-- "WebSocket" --> IO
+  A <-- "WebSocket" --> IO
+  EX --> MW --> SV
+  IO --> SV
+  SV --> RU
+  SV -- "better-sqlite3<br/>(transaction)" --> DB
+  classDef default fill:#EAF1FB,stroke:#1F4E8C,stroke-width:1.5px,color:#14213D

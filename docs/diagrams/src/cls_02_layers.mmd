@@ -1,0 +1,49 @@
+classDiagram
+  direction TB
+  class PublicRoutes["routes/public"] {
+    GET /api/courses
+    GET /api/classes
+    POST /api/registrations
+    POST /api/registrations/:code/pay
+    POST /api/placement/:code/start
+    POST /api/placement/:code/submit
+  }
+  class AdminRoutes["routes/admin"] {
+    POST /api/auth/login
+    GET /api/admin/dashboard
+    POST /api/admin/registrations/:id/enroll
+    POST /api/admin/classes/:id/open
+    PUT /api/admin/classes/:id/schedule
+    POST /api/admin/approvals/:id/decide
+  }
+  class ChatSocket["sockets/chat"] {
+    on chat:start / chat:resume
+    on chat:claim / chat:message
+    on chat:close
+  }
+  class Services["services/*"] {
+    CatalogService
+    RegistrationService
+    PlacementService
+    EnrollmentService
+    ScheduleService
+    ChatService
+    StatsService
+  }
+  class Rules["domain/rules.js (hàm thuần)"] {
+    evaluateClass()
+    placementDecision()
+    proposeResolution()
+    canOpenClass()
+    scoreToLevel()
+    findConflicts()
+  }
+  class Db["db/connection.js"] {
+    better-sqlite3
+    transaction()
+  }
+  PublicRoutes ..> Services
+  AdminRoutes ..> Services
+  ChatSocket ..> Services
+  Services ..> Rules
+  Services ..> Db

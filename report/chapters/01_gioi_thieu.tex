@@ -1,0 +1,66 @@
+\chapter{Giới thiệu đề tài và phân tích đề bài}
+\label{ch:intro}
+
+\section{Đặt vấn đề}
+Nhu cầu sở hữu chứng chỉ ngoại ngữ theo chuẩn quốc tế (IELTS, TOEIC, Cambridge) và chuẩn quốc gia (VSTEP – theo Khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam \cite{tt01}) ngày càng lớn, đặc biệt với sinh viên cần đạt chuẩn đầu ra và người đi làm cần chứng chỉ cho tuyển dụng. Các trung tâm luyện thi vì thế phải xử lý khối lượng lớn hồ sơ: quảng bá khoá học, tư vấn, thu học phí, kiểm tra đầu vào, xếp lớp theo trình độ, bố trí lịch học và phòng học.
+
+Khi các khâu này được làm thủ công (bảng tính, tin nhắn, giấy tờ), trung tâm thường gặp các vấn đề: thông tin lớp không cập nhật kịp thời; học viên phải gọi điện nhiều lần để hỏi lịch khai giảng; giáo vụ khó nắm được lớp nào đã đủ sĩ số để mở; lớp Offline bị xếp quá chỗ ngồi; lãnh đạo không có số liệu tổng hợp để ra quyết định. Đề tài 1A đặt ra yêu cầu xây dựng hệ thống phần mềm giải quyết các vấn đề trên.
+
+\section{Nội dung đề bài}
+\begin{notebox}[Đề tài 1A – nguyên văn yêu cầu nghiệp vụ (tóm lược)]
+\begin{enumerate}[leftmargin=1.6em]
+  \item Trung tâm đăng tải thông tin về các lớp học, phân loại thành lớp \textbf{Online} và \textbf{Offline}.
+  \item Có \textbf{phòng chat} để tư vấn trực tuyến cho người học.
+  \item Khi học viên đồng ý học: hệ thống \textbf{thu học phí}, sau đó chuyển học viên sang \textbf{hệ thống kiểm tra trình độ đầu vào}; kết quả được chuyển về văn phòng trung tâm để phân loại, xếp lớp.
+  \item Lớp Offline: \textbf{đủ 20 học viên} mới mở lớp, tối đa \textbf{30 học viên}; nếu vượt quá 30 thì việc tách lớp do \textbf{Lãnh đạo trung tâm} quyết định. Lớp Online có thể dưới 20 nhưng \textbf{không ít hơn 10}.
+  \item Lập lịch học cho các lớp, phân phòng học cho lớp Offline, lưu trữ toàn bộ quá trình đào tạo.
+  \item Phần lập trình: học một công cụ lập trình web và cài đặt 4 chức năng – \textbf{quảng bá thông tin các lớp học}, \textbf{nhận đăng ký từ học viên}, \textbf{tra cứu danh sách lớp}, \textbf{lập chat room tư vấn}.
+\end{enumerate}
+\end{notebox}
+
+\section{Bóc tách đề bài}
+Bước đầu tiên là chuyển từng câu chữ của đề bài thành yêu cầu có thể kiểm chứng và gán mã để truy vết xuyên suốt tài liệu, mã nguồn và kiểm thử (Bảng~\ref{tab:boc-tach}).
+
+\begin{xltabular}{\linewidth}{|c|L{4.6cm}|Y|c|}
+  \caption{Bóc tách đề bài thành yêu cầu}\label{tab:boc-tach}\\ \hline
+  \headrow \hd{\#} & \hd{Câu trong đề bài} & \hd{Hiểu thành yêu cầu hệ thống} & \hd{Mã} \\ \hline
+  \endfirsthead \hline
+  \headrow \hd{\#} & \hd{Câu trong đề bài} & \hd{Hiểu thành yêu cầu hệ thống} & \hd{Mã} \\ \hline
+  \endhead
+  1 & Đăng tải thông tin lớp, phân loại Online/Offline & Danh mục khoá học (lộ trình, chuẩn đầu ra, học phí) và lớp học; mỗi lớp có thuộc tính hình thức & FR-01, 02 \\ \hline
+  2 & Phòng chat tư vấn trực tuyến & Chat thời gian thực khách $\leftrightarrow$ tư vấn viên, hàng đợi, lưu lịch sử & FR-08..10 \\ \hline
+  3 & Đồng ý học → thu học phí → kiểm tra đầu vào & Hồ sơ đăng ký có vòng đời; chỉ hồ sơ đã nộp phí mới được thi & FR-04..07, BR-01 \\ \hline
+  4 & Kết quả kiểm tra chuyển về văn phòng để xếp lớp & Lưu kết quả, quy đổi CEFR; giáo vụ xếp lớp theo trình độ & FR-11, BR-06 \\ \hline
+  5 & Offline: đủ 20 mở lớp, tối đa 30, > 30 lãnh đạo quyết định & Ngưỡng sĩ số + quy trình tờ trình phê duyệt & BR-03, 04, FR-13 \\ \hline
+  6 & Online: < 20 nhưng không ít hơn 10 & Ngưỡng mở lớp online = 10 & BR-02 \\ \hline
+  7 & Lập lịch, phân phòng lớp Offline & Lịch theo thứ – ca; kiểm tra trùng phòng, trùng giảng viên, sức chứa & FR-12, BR-05 \\ \hline
+  8 & Lưu trữ quá trình đào tạo & Trạng thái lớp (tuyển sinh → đang học → kết thúc), danh sách học viên từng lớp & FR-12, BR-08 \\ \hline
+\end{xltabular}
+
+\subsection{Những điểm đề bài chưa nói rõ và giả định}
+Trong quá trình phân tích, một số điểm đề bài không quy định cụ thể; báo cáo nêu rõ giả định để làm cơ sở thiết kế:
+\begin{itemize}
+  \item \textbf{Sĩ số tối đa lớp Online:} đề bài không giới hạn. Hệ thống đặt tham số cấu hình \texttt{ONLINE\_MAX = 40} (giới hạn của phòng học trực tuyến), có thể thay đổi mà không sửa mã.
+  \item \textbf{Ý nghĩa của “tách lớp”:} nếu chia đôi một lớp 31 học viên sẽ được 16 + 15 – cả hai lớp đều dưới ngưỡng 20 và không được mở. Vì vậy hệ thống phân biệt hai cách tách: \emph{chia đều} (chỉ hợp lệ khi tổng $\geq 40$) và \emph{tách phần dư} sang lớp mới tiếp tục tuyển sinh (phân tích chi tiết ở mục~\ref{sec:br}).
+  \item \textbf{Bài kiểm tra đầu vào:} trắc nghiệm 20 câu, 20 phút, làm một lần; kết quả quy đổi về khung CEFR \cite{cefr} để so khớp với trình độ của lớp.
+  \item \textbf{Thanh toán:} cổng thanh toán (VNPay, MoMo, chuyển khoản) được mô phỏng trong prototype; giáo vụ có thể ghi nhận nộp tiền mặt tại quầy.
+\end{itemize}
+
+\section{Mục tiêu và phạm vi}
+\begin{itemize}
+  \item \textbf{Phân tích – thiết kế:} xây dựng đầy đủ tài liệu theo hướng đối tượng – yêu cầu, use case và đặc tả, biểu đồ hoạt động, tuần tự, trạng thái, lớp, thiết kế CSDL và kiến trúc.
+  \item \textbf{Lập trình:} ứng dụng web chạy được, có CSDL thật, hiện thực 4 chức năng bắt buộc; ngoài ra cài đặt thêm luồng thu phí – kiểm tra đầu vào – xếp lớp – phê duyệt sĩ số – lập lịch phòng học để \emph{chứng minh các quy tắc nghiệp vụ hoạt động đúng}, cùng dashboard thống kê cho văn phòng.
+  \item \textbf{Ngoài phạm vi:} tích hợp cổng thanh toán thật, gửi email/SMS, điểm danh – chấm điểm từng buổi học.
+\end{itemize}
+
+\section{Phương pháp và công cụ}
+\begin{itemize}
+  \item \textbf{Phương pháp:} phân tích thiết kế hướng đối tượng với UML 2.5 \cite{omg, fowler}; đặc tả use case theo khuôn mẫu của Cockburn \cite{cockburn}; quy trình phát triển lặp: phân tích → thiết kế → cài đặt → kiểm thử \cite{sommerville}.
+  \item \textbf{Biểu đồ:} viết dưới dạng mã Mermaid \cite{mermaid} (\textit{diagram as code}) trong thư mục \texttt{docs/diagrams/src}, render cục bộ thành ảnh PNG độ phân giải cao bằng \texttt{npm run diagrams} – thay đổi thiết kế chỉ cần sửa văn bản và render lại.
+  \item \textbf{Lập trình web:} Node.js 24, Express 5 \cite{express}, Socket.IO 4 \cite{socketio}, SQLite qua better-sqlite3 \cite{sqlite, bsqlite}, HTML/CSS/JavaScript thuần, Chart.js \cite{chartjs}.
+  \item \textbf{Kiểm thử:} bộ kiểm thử tích hợp sẵn của Node.js (\texttt{node:test}) \cite{nodetest}.
+  \item \textbf{Báo cáo:} \LaTeX{} (XeLaTeX, MiKTeX) với phông Times New Roman.
+\end{itemize}
+
+\section{Bố cục báo cáo}
+Ngoài phần mở đầu, báo cáo gồm 6 chương: Chương~\ref{ch:intro} giới thiệu và bóc tách đề bài; Chương~\ref{ch:analysis} phân tích yêu cầu, quy tắc nghiệp vụ và mô hình use case; Chương~\ref{ch:design} trình bày thiết kế (hoạt động, tuần tự, trạng thái, lớp, CSDL, API); Chương~\ref{ch:impl} mô tả cài đặt và kết quả giao diện; Chương~\ref{ch:test} trình bày kiểm thử; Chương~\ref{ch:conclusion} kết luận. Phụ lục hướng dẫn cài đặt và kịch bản chạy thử.

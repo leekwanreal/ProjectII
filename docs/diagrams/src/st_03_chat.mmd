@@ -1,0 +1,8 @@
+stateDiagram-v2
+  direction LR
+  [*] --> WAITING: Khách mở phiên
+  WAITING --> ACTIVE: Tư vấn viên nhận phiên
+  WAITING --> CLOSED: Khách kết thúc
+  ACTIVE --> ACTIVE: Trao đổi tin nhắn
+  ACTIVE --> CLOSED: Kết thúc phiên
+  CLOSED --> [*]

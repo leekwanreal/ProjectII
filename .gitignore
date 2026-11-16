@@ -5,3 +5,23 @@ build/
 .vscode/
 .idea/
 *.log
+*.sqlite
+database.test.sqlite
+CONTEXT.md
+AGENTS.md
+GEMINI.md
+# SQLite WAL & LaTeX build
+*.sqlite-wal
+*.sqlite-shm
+report/*.aux
+report/*.log
+report/*.toc
+report/*.lof
+report/*.lot
+report/*.out
+report/*.fls
+report/*.fdb_latexmk
+report/*.xdv
+report/*.synctex.gz
+report/main.pdf
+tools/puppeteer.json

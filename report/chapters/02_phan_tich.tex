@@ -1,0 +1,158 @@
+\chapter{Phân tích yêu cầu}
+\label{ch:analysis}
+
+\section{Tác nhân của hệ thống}
+\begin{xltabular}{\linewidth}{|L{3.6cm}|Y|L{5cm}|}
+  \caption{Các tác nhân}\label{tab:actors}\\ \hline
+  \headrow \hd{Tác nhân} & \hd{Mô tả} & \hd{Nhiệm vụ chính} \\ \hline
+  \endfirsthead \hline
+  \headrow \hd{Tác nhân} & \hd{Mô tả} & \hd{Nhiệm vụ chính} \\ \hline
+  \endhead
+  Khách / Học viên & Người quan tâm khoá học; sau khi đăng ký trở thành học viên & Xem khoá/lớp, tra cứu lớp, đăng ký, nộp học phí, làm bài kiểm tra, chat tư vấn \\ \hline
+  Tư vấn viên (\texttt{CONSULTANT}) & Nhân viên tư vấn tuyển sinh & Nhận phiên chat từ hàng đợi, trả lời realtime, kết thúc phiên \\ \hline
+  Giáo vụ (\texttt{ACADEMIC}) & Nhân viên văn phòng đào tạo & Thu tiền mặt, xếp lớp, lập lịch, phân phòng, mở/huỷ lớp \\ \hline
+  Lãnh đạo trung tâm (\texttt{DIRECTOR}) & Ban giám đốc & Phê duyệt tờ trình vượt sĩ số; xem báo cáo; có toàn quyền của giáo vụ \\ \hline
+  Cổng thanh toán & Hệ thống bên ngoài (VNPay, MoMo, ngân hàng) & Xác nhận giao dịch học phí \\ \hline
+\end{xltabular}
+
+\section{Yêu cầu chức năng}
+\begin{xltabular}{\linewidth}{|l|Y|L{2.6cm}|c|}
+  \caption{Danh sách yêu cầu chức năng}\label{tab:fr}\\ \hline
+  \headrow \hd{Mã} & \hd{Chức năng} & \hd{Tác nhân} & \hd{Code} \\ \hline
+  \endfirsthead \hline
+  \headrow \hd{Mã} & \hd{Chức năng} & \hd{Tác nhân} & \hd{Code} \\ \hline
+  \endhead
+  FR-01 & Xem danh mục khoá học: chứng chỉ, mục tiêu đầu ra, số giờ, học phí, lộ trình, chuẩn đầu ra & Khách & CN1 \\ \hline
+  FR-02 & Xem chi tiết lớp: hình thức, lịch, phòng, giảng viên, sĩ số và ngưỡng mở lớp & Khách & CN1 \\ \hline
+  FR-03 & Tra cứu, lọc lớp theo từ khoá, chứng chỉ, hình thức, ca học, trình độ, ngày khai giảng, còn chỗ & Khách & CN3 \\ \hline
+  FR-04 & Đăng ký học trực tuyến (thông tin cá nhân, khoá, hình thức, ca, lớp mong muốn) & Khách & CN2 \\ \hline
+  FR-05 & Tra cứu hồ sơ bằng mã hồ sơ + số điện thoại & Học viên & $\checkmark$ \\ \hline
+  FR-06 & Nộp học phí trực tuyến / ghi nhận tiền mặt & Học viên, Giáo vụ & $\checkmark$ \\ \hline
+  FR-07 & Làm bài kiểm tra đầu vào, chấm tự động, quy đổi CEFR & Học viên & $\checkmark$ \\ \hline
+  FR-08 & Mở phiên chat tư vấn, khôi phục phiên khi tải lại trang & Khách & CN4 \\ \hline
+  FR-09 & Nhận phiên từ hàng đợi, trao đổi thời gian thực & Tư vấn viên & CN4 \\ \hline
+  FR-10 & Kết thúc phiên, xem lịch sử hội thoại & Tư vấn viên & CN4 \\ \hline
+  FR-11 & Xếp học viên vào lớp theo kết quả kiểm tra (có gợi ý) & Giáo vụ & $\checkmark$ \\ \hline
+  FR-12 & Lập lịch học, phân phòng, phân giảng viên; mở, huỷ, kết thúc lớp & Giáo vụ & $\checkmark$ \\ \hline
+  FR-13 & Phê duyệt tờ trình vượt sĩ số: tách lớp / giữ ngoại lệ / từ chối & Lãnh đạo & $\checkmark$ \\ \hline
+  FR-14 & Dashboard: doanh thu, phễu tuyển sinh, tình trạng sĩ số, phân bố trình độ & Nhân viên & $\checkmark$ \\ \hline
+\end{xltabular}
+\noindent CN1–CN4 là 4 chức năng bắt buộc của đề bài; dấu $\checkmark$ là chức năng được cài đặt thêm để hoàn thiện luồng nghiệp vụ.
+
+\section{Quy tắc nghiệp vụ}
+\label{sec:br}
+\begin{xltabular}{\linewidth}{|l|Y|}
+  \caption{Quy tắc nghiệp vụ được chuẩn hoá}\label{tab:br}\\ \hline
+  \headrow \hd{Mã} & \hd{Quy tắc} \\ \hline
+  \endfirsthead \hline
+  \headrow \hd{Mã} & \hd{Quy tắc} \\ \hline
+  \endhead
+  BR-01 & Hồ sơ chỉ được làm bài kiểm tra đầu vào khi đã thanh toán (\texttt{PAID}). Mỗi hồ sơ làm đúng một lần, thời gian 20 phút, đề được lưu lại khi phát để chống đổi đề. \\ \hline
+  BR-02 & Lớp Online đủ điều kiện mở khi sĩ số $\geq 10$; sĩ số tối đa là tham số cấu hình (mặc định 40). Lớp online đầy thì từ chối xếp thêm (không lập tờ trình). \\ \hline
+  BR-03 & Lớp Offline đủ điều kiện mở khi sĩ số $\geq 20$; sĩ số chuẩn $\leq 30$. \\ \hline
+  BR-04 & Xếp học viên vào lớp Offline đã có 30 học viên: hệ thống \textbf{không tự xếp}, hồ sơ chuyển \texttt{WAITING\_APPROVAL}, hệ thống lập (hoặc bổ sung) \textbf{tờ trình} gửi Lãnh đạo. Mỗi lớp có tối đa một tờ trình đang chờ. \\ \hline
+  BR-05 & Lớp Offline phải có phòng trước khi mở; sức chứa phòng $\geq$ sĩ số; không trùng phòng hoặc giảng viên ở cùng thứ – ca trong khoảng thời gian học giao nhau. \\ \hline
+  BR-06 & Xếp lớp: lớp phải thuộc khoá đã đăng ký và nộp phí; trình độ lớp = trình độ đánh giá; ưu tiên lớp mong muốn, hình thức, ca. Xếp lệch trình độ phải ghi lý do. \\ \hline
+  BR-07 & Sĩ số lớp là \textbf{giá trị tính toán} = số hồ sơ \texttt{ENROLLED} của lớp; không lưu bộ đếm để tránh sai lệch dữ liệu. \\ \hline
+  BR-08 & Chỉ mở lớp (\texttt{RECRUITING} → \texttt{IN\_PROGRESS}) khi đủ ngưỡng tối thiểu, không còn tờ trình chờ, và (Offline) đã có phòng hợp lệ. Huỷ lớp thì các hồ sơ trong lớp trở về \texttt{TESTED} để xếp lớp khác. \\ \hline
+\end{xltabular}
+
+\subsection{Phân tích quy tắc tách lớp khi vượt sĩ số}
+Đề bài chỉ nói “nếu số học viên vượt quá 30 thì quyết định tách lớp thuộc quyền Lãnh đạo”. Tuy nhiên phải kết hợp với BR-03 mới thấy hết bài toán. Gọi $n = 30$ là số học viên đã xếp và $k \geq 1$ là số hồ sơ đang chờ, tổng $T = n + k$. Nếu tách thành hai lớp, mỗi lớp phải có ít nhất 20 học viên mới được mở, tức là:
+\[
+  \left\lfloor T/2 \right\rfloor \geq 20 \iff T \geq 40 .
+\]
+Như vậy với $T = 31$ (trường hợp phổ biến nhất – chỉ một học viên dư) mà “chia đôi” thành $16 + 15$ thì \emph{cả hai lớp đều không đủ điều kiện mở}, đi ngược mục đích của việc tách lớp. Từ phân tích này, hệ thống đưa ra ba phương án và tự động đề xuất một phương án cho Lãnh đạo:
+
+\begin{rulebox}[Phương án xử lý tờ trình (hàm \texttt{proposeResolution})]
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Tách lớp – chia đều} (khi $T \geq 40$ và lớp chưa khai giảng): tạo lớp mới cùng khoá, trình độ, lịch; chia $\lceil T/2\rceil + \lfloor T/2\rfloor$, cả hai lớp đủ điều kiện mở.
+  \item \textbf{Tách lớp – tách phần dư} (khi $T < 40$ hoặc lớp đang học): giữ 30 học viên ở lớp cũ, chuyển $k$ hồ sơ sang lớp mới ở trạng thái tuyển sinh; lớp mới cần thêm $20 - k$ học viên mới mở được.
+  \item \textbf{Giữ ngoại lệ}: cho lớp vượt chuẩn với $T$ học viên – \emph{chỉ khả thi khi sức chứa phòng} $\geq T$ (liên kết với BR-05).
+  \item \textbf{Từ chối}: $k$ hồ sơ trở về trạng thái chờ xếp lớp để giáo vụ xếp lớp/ca khác.
+\end{enumerate}
+\textit{Đề xuất mặc định:} chia đều nếu $T \geq 40$; ngược lại giữ ngoại lệ nếu phòng đủ chỗ, nếu không thì tách phần dư.
+\end{rulebox}
+
+\section{Yêu cầu phi chức năng}
+\begin{itemize}
+  \item \textbf{Khả dụng:} giao diện tiếng Việt, responsive trên máy tính và điện thoại, hỗ trợ chế độ sáng/tối; chạy được hoàn toàn offline (không phụ thuộc CDN).
+  \item \textbf{Hiệu năng thời gian thực:} tin nhắn chat được đẩy tới bên kia qua WebSocket, độ trễ dưới 1 giây trong mạng nội bộ.
+  \item \textbf{Bảo mật – riêng tư:} tra cứu hồ sơ phải khớp cả mã hồ sơ và số điện thoại; mật khẩu nhân viên băm bằng scrypt; API quản trị yêu cầu token ký HMAC có thời hạn; mọi truy vấn SQL đều tham số hoá; nội dung hiển thị được escape chống XSS.
+  \item \textbf{Toàn vẹn dữ liệu:} khoá ngoại, ràng buộc \texttt{CHECK}, chỉ mục duy nhất có điều kiện; các thao tác nhiều bước (xếp lớp, phê duyệt, huỷ lớp) chạy trong một giao dịch.
+  \item \textbf{Bảo trì:} quy tắc nghiệp vụ tập trung trong một mô-đun hàm thuần, có kiểm thử tự động bao phủ các giá trị biên.
+\end{itemize}
+
+\section{Mô hình use case}
+\subsection{Biểu đồ use case tổng quát}
+Hình~\ref{fig:uc0} thể hiện 10 use case chính. Bốn use case tô màu vàng là các chức năng bắt buộc phải lập trình; use case màu đỏ liên quan trực tiếp đến quy tắc sĩ số do Lãnh đạo quyết định.
+\fig[0.78\linewidth]{uc_00_tong_quat}{Biểu đồ use case tổng quát}{fig:uc0}
+
+\subsection{Biểu đồ use case phân rã}
+Để tránh một biểu đồ quá lớn khiến chữ bị nhỏ, các use case được phân rã theo phân hệ (Hình~\ref{fig:uc1}–\ref{fig:uc5}).
+\fig[0.85\linewidth]{uc_01_tuyen_sinh}{Phân hệ Quảng bá – Tra cứu – Đăng ký}{fig:uc1}
+\fig[0.85\linewidth]{uc_02_chat}{Phân hệ Tư vấn trực tuyến}{fig:uc2}
+\fig[0.85\linewidth]{uc_03_thuphi_thi}{Phân hệ Thu học phí – Kiểm tra đầu vào}{fig:uc3}
+\fig[0.85\linewidth]{uc_04_xeplop}{Phân hệ Xếp lớp – Phê duyệt sĩ số}{fig:uc4}
+\fig[0.85\linewidth]{uc_05_lich_phong}{Phân hệ Lịch học – Phòng học – Đào tạo}{fig:uc5}
+
+\subsection{Đặc tả use case}
+\newcommand{\ucrow}[2]{\textbf{#1} & #2 \\ \hline}
+\newenvironment{ucspec}[2]{%
+  \xltabular{\linewidth}{|>{\columncolor{lightgray}}L{3.3cm}|Y|}
+  \caption{#1}\label{#2}\\ \hline
+  \endfirsthead \hline \endhead}{\endxltabular}
+
+\begin{ucspec}{Đặc tả UC-02 Tra cứu danh sách lớp (CN3)}{tab:uc02}
+  \ucrow{Tác nhân}{Khách}
+  \ucrow{Mục đích}{Tìm lớp phù hợp theo nhu cầu và xem tình trạng sĩ số}
+  \ucrow{Tiền điều kiện}{Không}
+  \ucrow{Luồng chính}{1. Khách nhập từ khoá và/hoặc chọn bộ lọc: chứng chỉ, hình thức, ca học, trình độ, khai giảng từ ngày, chỉ lớp còn chỗ.\newline 2. Hệ thống gửi \texttt{GET /api/classes} với các tham số.\newline 3. Hệ thống truy vấn lớp đang tuyển sinh kèm khoá học, giảng viên, phòng và sĩ số (view \texttt{v\_class\_enrollment}).\newline 4. Với mỗi lớp, hệ thống đánh giá trạng thái sĩ số theo BR-02/BR-03.\newline 5. Hiển thị danh sách thẻ lớp kèm thanh sĩ số có vạch ngưỡng mở lớp và nút “Đăng ký lớp này”.}
+  \ucrow{Luồng thay thế}{3a. Không có kết quả: hiển thị thông báo và gợi ý nới bộ lọc.\newline 1a. Khách đổi bộ lọc: kết quả cập nhật tức thì (debounce 220 ms).}
+  \ucrow{Hậu điều kiện}{Không thay đổi dữ liệu}
+\end{ucspec}
+
+\begin{ucspec}{Đặc tả UC-03 Đăng ký học (CN2)}{tab:uc03}
+  \ucrow{Tác nhân}{Khách}
+  \ucrow{Tiền điều kiện}{Khoá học đang được công bố}
+  \ucrow{Luồng chính}{1. Khách mở form (trực tiếp hoặc từ nút “Đăng ký lớp này”, form tự điền khoá, hình thức, ca, lớp).\newline 2. Nhập họ tên, ngày sinh, SĐT, email, khoá học, hình thức, ca mong muốn, lớp mong muốn, ghi chú.\newline 3. Hệ thống kiểm tra hợp lệ phía trình duyệt rồi gửi \texttt{POST /api/registrations}.\newline 4. Máy chủ kiểm tra lại toàn bộ dữ liệu; tìm học viên cũ theo email/SĐT, nếu chưa có thì tạo mới.\newline 5. Tạo hồ sơ trạng thái \texttt{PENDING\_PAYMENT}, cấp mã \texttt{DK-YYYY-NNNN}.\newline 6. Hiển thị mã hồ sơ, học phí và nút “Nộp học phí ngay”.}
+  \ucrow{Ngoại lệ}{3a/4a. Dữ liệu sai: trả 400 kèm lỗi theo từng trường, form tô đỏ trường lỗi.\newline 4b. Học viên đã có hồ sơ hiệu lực cho cùng khoá: trả 409 kèm mã hồ sơ cũ.\newline 4c. Email và SĐT thuộc hai học viên khác nhau: trả 409.\newline 4d. Lớp mong muốn không thuộc khoá hoặc khác hình thức: trả 400.}
+  \ucrow{Hậu điều kiện}{Có bản ghi \texttt{students} (nếu mới) và \texttt{registrations}}
+\end{ucspec}
+
+\begin{ucspec}{Đặc tả UC-05 Kiểm tra trình độ đầu vào}{tab:uc05}
+  \ucrow{Tác nhân}{Học viên}
+  \ucrow{Tiền điều kiện}{Hồ sơ ở trạng thái \texttt{PAID} (BR-01)}
+  \ucrow{Luồng chính}{1. Học viên tra cứu hồ sơ (mã + SĐT) và bấm “Bắt đầu làm bài”.\newline 2. Hệ thống tạo lượt thi, chọn ngẫu nhiên 20 câu cân bằng 5 mức độ khó, lưu danh sách câu đã phát; trả câu hỏi \emph{không kèm đáp án}.\newline 3. Học viên làm bài, đồng hồ đếm ngược 20 phút; câu trả lời được lưu tạm ở trình duyệt.\newline 4. Học viên nộp bài; hệ thống chấm theo đề đã lưu, quy đổi CEFR, chuyển hồ sơ sang \texttt{TESTED}.\newline 5. Kết quả hiển thị cho học viên và xuất hiện ở văn phòng trong danh sách “Chờ xếp lớp”.}
+  \ucrow{Ngoại lệ}{1a. Chưa nộp học phí: 403 \texttt{PAYMENT\_REQUIRED}.\newline 4a. Đã nộp trước đó: 409.\newline 4b. Quá giờ (cho phép trễ 60 giây do mạng): 410.\newline 3a. Tải lại trang giữa chừng: tiếp tục đúng đề cũ, thời gian vẫn tính.}
+\end{ucspec}
+
+\begin{ucspec}{Đặc tả UC-06 Tư vấn trực tuyến (CN4)}{tab:uc06}
+  \ucrow{Tác nhân}{Khách (chính), Tư vấn viên}
+  \ucrow{Luồng chính}{1. Khách mở widget chat, nhập tên, liên hệ, chủ đề.\newline 2. Hệ thống tạo phiên \texttt{WAITING}, gửi lời chào tự động, đẩy sự kiện cập nhật hàng đợi tới các tư vấn viên đang trực tuyến.\newline 3. Tư vấn viên bấm “Nhận phiên”; hệ thống cập nhật có điều kiện (chỉ một người nhận được), phiên chuyển \texttt{ACTIVE}, gửi tin hệ thống “Tư vấn viên X đã tham gia”.\newline 4. Hai bên trao đổi; mỗi tin nhắn được lưu CSDL rồi phát tới phòng chat; có chỉ báo “đang soạn tin”.\newline 5. Tư vấn viên (hoặc khách) kết thúc; phiên chuyển \texttt{CLOSED}.}
+  \ucrow{Luồng thay thế}{1a. Khách tải lại trang: widget dùng \texttt{sessionId} đã lưu để khôi phục phiên và toàn bộ lịch sử.\newline 3a. Tư vấn viên khác đã nhận: thông báo lỗi “phiên đã được nhận”.}
+  \ucrow{Ràng buộc}{Tư vấn viên phải nhận phiên mới được trả lời; socket lạ không gửi tin vào phiên của người khác được.}
+\end{ucspec}
+
+\begin{ucspec}{Đặc tả UC-07 Xếp lớp và UC-08 Phê duyệt tờ trình}{tab:uc07}
+  \ucrow{Tác nhân}{Giáo vụ (UC-07), Lãnh đạo trung tâm (UC-08)}
+  \ucrow{Tiền điều kiện}{Hồ sơ \texttt{TESTED} (UC-07); tờ trình \texttt{PENDING} (UC-08)}
+  \ucrow{Luồng chính UC-07}{1. Giáo vụ mở hồ sơ, hệ thống gợi ý danh sách lớp đã xếp hạng theo BR-06.\newline 2. Giáo vụ chọn lớp. 3. Hệ thống áp dụng \texttt{placementDecision}: Online còn chỗ hoặc Offline < 30 → \texttt{ENROLLED}.}
+  \ucrow{Rẽ nhánh UC-07}{3a. Offline đã đủ 30 → hồ sơ \texttt{WAITING\_APPROVAL}, tạo/bổ sung tờ trình (BR-04).\newline 3b. Online đầy, sai khoá, lớp đã đóng → từ chối kèm lý do.\newline 1a. Lệch trình độ → bắt buộc nhập lý do, lưu vào hồ sơ.}
+  \ucrow{Luồng chính UC-08}{1. Lãnh đạo xem tờ trình: sĩ số hiện tại, số hồ sơ chờ, sức chứa phòng, danh sách hồ sơ chờ và phương án đề xuất.\newline 2. Chọn quyết định (tách lớp / giữ ngoại lệ / từ chối) và ghi chú.\newline 3. Hệ thống thực thi trong \textbf{một giao dịch}; ghi người duyệt, thời điểm, lớp mới (nếu tách).}
+  \ucrow{Ngoại lệ UC-08}{Giữ ngoại lệ khi phòng không đủ chỗ → 422; tờ trình đã xử lý → 409; người không phải Lãnh đạo → 403.}
+\end{ucspec}
+
+\section{Ma trận phân quyền}
+\begin{table}[H]\centering
+\caption{Ma trận phân quyền theo vai trò}\label{tab:rbac}
+\begin{tabular}{|l|c|c|c|c|}
+  \hline
+  \headrow \hd{Chức năng} & \hd{Khách} & \hd{Tư vấn viên} & \hd{Giáo vụ} & \hd{Lãnh đạo} \\ \hline
+  Xem, tra cứu, đăng ký, nộp phí, làm bài & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\ \hline
+  Trả lời chat tư vấn & & $\checkmark$ & & $\checkmark$ \\ \hline
+  Xem dashboard, danh sách hồ sơ, lớp & & $\checkmark$ & $\checkmark$ & $\checkmark$ \\ \hline
+  Thu tiền mặt, xếp lớp, lập lịch, mở/huỷ lớp & & & $\checkmark$ & $\checkmark$ \\ \hline
+  Phê duyệt tờ trình vượt sĩ số & & & & $\checkmark$ \\ \hline
+\end{tabular}
+\end{table}

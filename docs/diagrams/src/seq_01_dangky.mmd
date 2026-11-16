@@ -1,0 +1,37 @@
+sequenceDiagram
+  autonumber
+  actor HV as Học viên
+  participant UI as Cổng học viên
+  participant API as Registration API
+  participant SV as RegistrationService
+  participant DB as SQLite
+  HV->>UI: Điền form đăng ký, bấm Gửi
+  UI->>UI: Kiểm tra hợp lệ phía client
+  UI->>API: POST /api/registrations
+  API->>SV: create(dto)
+  SV->>SV: validate(dto): SĐT, email, ngày sinh
+  SV->>DB: SELECT khoá học, lớp mong muốn
+  SV->>DB: SELECT học viên theo email / SĐT
+  opt Chưa có học viên
+    SV->>DB: INSERT students
+  end
+  SV->>DB: SELECT hồ sơ hiệu lực cùng khoá
+  alt Đã tồn tại
+    SV-->>API: lỗi DUPLICATE
+    API-->>UI: 409 + thông báo
+  else Hợp lệ
+    SV->>DB: INSERT registrations (PENDING_PAYMENT)
+    API-->>UI: 201 {mã DK-YYYY-NNNN, học phí}
+    UI-->>HV: Hiển thị mã hồ sơ + nút Thanh toán
+  end
+  HV->>UI: Thanh toán (mô phỏng VNPay / MoMo)
+  UI->>API: POST /api/registrations/{code}/pay {phone, method}
+  API->>DB: BEGIN · INSERT payments · status = PAID · COMMIT
+  API-->>UI: 200 PAID
+  HV->>UI: Bắt đầu bài kiểm tra
+  UI->>API: POST /api/placement/{code}/start
+  API->>DB: Kiểm tra status = PAID (BR-01)
+  API-->>UI: 20 câu hỏi (không kèm đáp án)
+  UI->>API: POST /api/placement/{code}/submit {answers}
+  API->>DB: Chấm điểm · lưu attempt · status = TESTED
+  API-->>UI: Điểm + trình độ CEFR

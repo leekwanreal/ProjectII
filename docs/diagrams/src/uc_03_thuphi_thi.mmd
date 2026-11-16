@@ -1,0 +1,26 @@
+flowchart LR
+  HV["👤<br/>Học viên"]:::actor
+  GV["👤<br/>Giáo vụ"]:::actor
+  PAY["⚙<br/>Cổng thanh toán"]:::actor
+  subgraph S["Phân hệ Thu học phí – Kiểm tra đầu vào"]
+    direction TB
+    P1(["Thanh toán trực tuyến"]):::core
+    P2(["Ghi nhận thu tiền mặt"]):::uc
+    P3(["Tra cứu hồ sơ"]):::uc
+    T1(["Làm bài kiểm tra đầu vào"]):::core
+    T2(["Chấm điểm & quy đổi CEFR"]):::uc
+    T3(["Kiểm tra điều kiện đã nộp học phí (BR-01)"]):::rule
+    T4(["Xem kết quả kiểm tra"]):::uc
+  end
+  HV --- P1
+  HV --- T1
+  P1 --- PAY
+  GV --- P2
+  GV --- T4
+  P1 -. "«include»" .-> P3
+  T1 -. "«include»" .-> T3
+  T1 -. "«include»" .-> T2
+classDef actor fill:#ffffff,stroke:#1F4E8C,stroke-width:2.5px,color:#14213D,font-weight:bold
+classDef uc fill:#EAF1FB,stroke:#1F4E8C,stroke-width:1.5px,color:#14213D
+classDef core fill:#FFF4D6,stroke:#C9A227,stroke-width:2px,color:#14213D,font-weight:bold
+classDef rule fill:#FDECEC,stroke:#B3261E,stroke-width:1.5px,color:#14213D

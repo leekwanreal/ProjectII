@@ -1,0 +1,26 @@
+flowchart LR
+  GV["👤<br/>Giáo vụ"]:::actor
+  LD["👤<br/>Lãnh đạo trung tâm"]:::actor
+  subgraph S["Phân hệ Xếp lớp – Phê duyệt sĩ số"]
+    direction TB
+    X1(["Xếp học viên vào lớp"]):::core
+    X2(["Gợi ý lớp theo trình độ / hình thức / ca"]):::uc
+    X3(["Kiểm tra sĩ số (BR-02, BR-03)"]):::rule
+    X4(["Lập tờ trình vượt sĩ số (BR-04)"]):::rule
+    D1(["Phê duyệt tờ trình"]):::core
+    D2(["Tách lớp"]):::uc
+    D3(["Giữ sĩ số ngoại lệ"]):::uc
+    D4(["Từ chối"]):::uc
+  end
+  GV --- X1
+  LD --- D1
+  X1 -. "«include»" .-> X2
+  X1 -. "«include»" .-> X3
+  X4 -. "«extend» (Offline > 30)" .-> X1
+  D2 -. "«extend»" .-> D1
+  D3 -. "«extend»" .-> D1
+  D4 -. "«extend»" .-> D1
+classDef actor fill:#ffffff,stroke:#1F4E8C,stroke-width:2.5px,color:#14213D,font-weight:bold
+classDef uc fill:#EAF1FB,stroke:#1F4E8C,stroke-width:1.5px,color:#14213D
+classDef core fill:#FFF4D6,stroke:#C9A227,stroke-width:2px,color:#14213D,font-weight:bold
+classDef rule fill:#FDECEC,stroke:#B3261E,stroke-width:1.5px,color:#14213D
