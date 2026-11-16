@@ -65,7 +65,7 @@ Quy đổi điểm thi (20 câu) → CEFR: < 30 % A1 · < 50 % A2 · < 70 % B1 �
 - Chat độ trễ < 1 giây (WebSocket), lưu bền vững vào CSDL, khôi phục phiên khi tải lại trang.
 - Dữ liệu cá nhân: tra cứu hồ sơ yêu cầu đủ mã hồ sơ + SĐT; mật khẩu nhân viên băm scrypt; API quản trị yêu cầu token có hạn.
 - Toàn vẹn dữ liệu: khoá ngoại, CHECK, giao dịch (transaction) cho các thao tác nhiều bước (xếp lớp, phê duyệt tách lớp).
-- Chạy offline hoàn toàn (không phụ thuộc CDN).
+- Thư viện giao diện phục vụ từ máy chủ, chạy được khi không có Internet (phông chữ web tự lùi về phông hệ thống).
 
 ## 6. Ma trận phân quyền
 

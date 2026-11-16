@@ -158,28 +158,33 @@ function decide(requestId, decision, note, directorId) {
     } else {
       const split = proposal.options.SPLIT;
       const slots = d.prepare('SELECT weekday, shift FROM class_schedules WHERE class_id = ?').all(cls.class_id);
-      const newSize = split.sizes[1];
-      const { teacherId, roomId } = autoArrange(cls, slots, newSize);
-      const code = nextChildCode(cls);
-      resultClassId = Number(d.prepare(`INSERT INTO classes (code, course_id, level, form, start_date, end_date, teacher_id, room_id, meeting_link, status, parent_class_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'RECRUITING', ?)`)
-        .run(code, cls.course_id, cls.level, cls.form, cls.start_date, cls.end_date, teacherId, roomId, cls.form === 'ONLINE' ? cls.meeting_link : null, cls.class_id).lastInsertRowid);
-      const ins = d.prepare('INSERT INTO class_schedules (class_id, weekday, shift) VALUES (?, ?, ?)');
-      for (const s of slots) ins.run(resultClassId, s.weekday, s.shift);
-
-      const moveWaiting = waitingRegs.slice(0, newSize);
-      const stayWaiting = waitingRegs.slice(newSize);
+      const newSizes = split.sizes.slice(1);                       // sĩ số từng lớp mới
+      const totalNew = newSizes.reduce((x, y) => x + y, 0);
       const mv = d.prepare(`UPDATE registrations SET class_id = ?, status = 'ENROLLED', updated_at = ${now} WHERE registration_id = ?`);
-      for (const r of moveWaiting) mv.run(resultClassId, r.registration_id);
-      for (const r of stayWaiting) mv.run(cls.class_id, r.registration_id);
-      const moveEnrolled = newSize - moveWaiting.length;
-      if (moveEnrolled > 0) {
-        const latest = d.prepare("SELECT registration_id FROM registrations WHERE class_id = ? AND status = 'ENROLLED' ORDER BY updated_at DESC, registration_id DESC LIMIT ?").all(cls.class_id, moveEnrolled);
-        for (const r of latest) mv.run(resultClassId, r.registration_id);
+      // Người chuyển sang lớp mới: ưu tiên hồ sơ đang chờ; nếu chia đều còn thiếu thì lấy học viên được xếp muộn nhất
+      const movers = waitingRegs.slice(0, totalNew).map((r) => r.registration_id);
+      for (const r of waitingRegs.slice(totalNew)) mv.run(cls.class_id, r.registration_id);
+      if (movers.length < totalNew) {
+        const latest = d.prepare("SELECT registration_id FROM registrations WHERE class_id = ? AND status = 'ENROLLED' ORDER BY updated_at DESC, registration_id DESC LIMIT ?").all(cls.class_id, totalNew - movers.length);
+        movers.push(...latest.map((r) => r.registration_id));
       }
-      const a = counts(cls.class_id).enrolled;
-      const b = counts(resultClassId).enrolled;
-      summary = `Tách lớp – ${cls.code}: ${a} HV, lớp mới ${code}: ${b} HV${b < CAPACITY.OFFLINE.min && cls.form === 'OFFLINE' ? ` (cần tuyển thêm ${CAPACITY.OFFLINE.min - b} HV để mở lớp)` : ''}.`;
+      const insCls = d.prepare(`INSERT INTO classes (code, course_id, level, form, start_date, end_date, teacher_id, room_id, meeting_link, status, parent_class_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'RECRUITING', ?)`);
+      const insSlot = d.prepare('INSERT INTO class_schedules (class_id, weekday, shift) VALUES (?, ?, ?)');
+      const created = [];
+      let offset = 0;
+      for (const size of newSizes) {
+        const { teacherId, roomId } = autoArrange(cls, slots, size);   // mỗi lớp mới một giảng viên/phòng không trùng lịch
+        const code = nextChildCode(cls);
+        const id = Number(insCls.run(code, cls.course_id, cls.level, cls.form, cls.start_date, cls.end_date, teacherId, roomId, null, cls.class_id).lastInsertRowid);
+        for (const sl of slots) insSlot.run(id, sl.weekday, sl.shift);
+        for (const regId of movers.slice(offset, offset + size)) mv.run(id, regId);
+        offset += size;
+        created.push({ id, code, size: counts(id).enrolled });
+      }
+      resultClassId = created[0].id;
+      const lack = created.filter((c) => c.size < CAPACITY.OFFLINE.min);
+      summary = `Tách lớp – ${cls.code}: ${counts(cls.class_id).enrolled} HV; ${created.map((c) => `${c.code}: ${c.size} HV`).join('; ')}${lack.length ? ` (${lack.map((c) => `${c.code} cần tuyển thêm ${CAPACITY.OFFLINE.min - c.size} HV`).join(', ')} để mở lớp)` : ''}.`;
     }
 
     d.prepare(`UPDATE approval_requests SET status = ?, decision = ?, decision_note = ?, decided_by = ?, decided_at = ${now}, result_class_id = ? WHERE request_id = ?`)

@@ -35,6 +35,15 @@ test('Tư vấn viên chưa nhận phiên thì không trả lời được', asy
   assert.equal(r.ok, false);
 });
 
+test('Giáo vụ không được nhận phiên tư vấn (đúng ma trận phân quyền)', async () => {
+  const token = (await t.api('POST', '/api/auth/login', { username: 'giaovu', password: '123456' })).body.token;
+  const s = connect(t.base, { auth: { token }, transports: ['websocket'] });
+  await once(s, 'connect');
+  const r = await emit(s, 'chat:claim', { sessionId });
+  s.close();
+  assert.equal(r.ok, false);
+});
+
 test('Tư vấn viên 1 nhận phiên → ACTIVE; tư vấn viên 2 nhận lại bị từ chối', async () => {
   const sys = once(guest, 'chat:claimed');
   const r = await emit(staff, 'chat:claim', { sessionId });

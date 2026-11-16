@@ -8,8 +8,8 @@ const normPhone = (p) => String(p || '').replace(/[\s.]/g, '').replace(/^\+84/, 
 
 function nextRegCode() {
   const year = new Date().getFullYear();
-  const row = db.get().prepare("SELECT reg_code FROM registrations WHERE reg_code LIKE ? ORDER BY reg_code DESC LIMIT 1").get(`DK-${year}-%`);
-  const seq = row ? Number(row.reg_code.split('-')[2]) + 1 : 1;
+  const row = db.get().prepare('SELECT MAX(CAST(substr(reg_code, 9) AS INTEGER)) AS n FROM registrations WHERE reg_code LIKE ?').get(`DK-${year}-%`);
+  const seq = (row.n || 0) + 1;
   return `DK-${year}-${String(seq).padStart(4, '0')}`;
 }
 

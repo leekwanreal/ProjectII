@@ -4,9 +4,9 @@
 \section{Chiến lược kiểm thử}
 Hệ thống được kiểm thử tự động ở ba mức, chạy bằng một lệnh \texttt{npm test}:
 \begin{itemize}
-  \item \textbf{Kiểm thử đơn vị} (\texttt{tests/rules.test.js}, 36 ca): kiểm tra các hàm thuần của bộ quy tắc nghiệp vụ, tập trung vào \emph{giá trị biên}: 9/10 học viên (online), 19/20 và 30/31 (offline), 39/40 (chia đều), các mốc quy đổi điểm CEFR.
-  \item \textbf{Kiểm thử tích hợp API} (\texttt{tests/api.test.js}, 29 ca): khởi động máy chủ thật trên cổng ngẫu nhiên với \emph{CSDL tạm riêng} được nạp dữ liệu mẫu, gọi HTTP như trình duyệt, đi hết luồng đăng ký → thanh toán → thi → xếp lớp → tờ trình → phê duyệt → lập lịch → mở/huỷ lớp, đồng thời kiểm tra phân quyền.
-  \item \textbf{Kiểm thử thời gian thực} (\texttt{tests/chat.test.js}, 7 ca): ba client Socket.IO (một khách, hai tư vấn viên) kiểm tra hàng đợi, nhận phiên tranh chấp, nhắn tin hai chiều, khôi phục phiên, chặn socket lạ, đóng phiên.
+  \item \textbf{Kiểm thử đơn vị} (\texttt{tests/rules.test.js}, 39 ca): kiểm tra các hàm thuần của bộ quy tắc nghiệp vụ, tập trung vào \emph{giá trị biên}: 9/10 học viên (online), 19/20 và 30/31 (offline), 39/40 (chia đều), các mốc quy đổi điểm CEFR.
+  \item \textbf{Kiểm thử tích hợp API} (\texttt{tests/api.test.js}, 31 ca): khởi động máy chủ thật trên cổng ngẫu nhiên với \emph{CSDL tạm riêng} được nạp dữ liệu mẫu, gọi HTTP như trình duyệt, đi hết luồng đăng ký → thanh toán → thi → xếp lớp → tờ trình → phê duyệt → lập lịch → mở/huỷ lớp, đồng thời kiểm tra phân quyền.
+  \item \textbf{Kiểm thử thời gian thực} (\texttt{tests/chat.test.js}, 8 ca): các client Socket.IO (một khách, hai tư vấn viên, một giáo vụ) kiểm tra hàng đợi, nhận phiên tranh chấp, nhắn tin hai chiều, khôi phục phiên, chặn socket lạ, đóng phiên.
 \end{itemize}
 Mỗi tệp kiểm thử dùng CSDL riêng trong thư mục tạm nên kết quả lặp lại được và không ảnh hưởng dữ liệu demo.
 
@@ -45,6 +45,9 @@ Mỗi tệp kiểm thử dùng CSDL riêng trong thư mục tạm nên kết qu�
   TC-26 & Tin nhắn hai chiều realtime & Bên kia nhận đúng nội dung, đúng người gửi & Đạt \\ \hline
   TC-27 & Socket lạ gửi tin vào phiên người khác & Bị từ chối & Đạt \\ \hline
   TC-28 & Đóng phiên rồi gửi tiếp & Bị từ chối; tin nhắn đã lưu CSDL & Đạt \\ \hline
+  TC-29 & Tách lớp khi 30 + 35 hồ sơ chờ & Ba lớp 22 / 22 / 21 (không lớp nào vượt 30); hai lớp mới khác giảng viên, không trùng phòng & Đạt \\ \hline
+  TC-30 & Sai mật khẩu 8 lần liên tiếp & Lần thứ 9 trả 429 kể cả khi nhập đúng & Đạt \\ \hline
+  TC-31 & Giáo vụ nhận phiên chat & Bị từ chối (chỉ tư vấn viên/lãnh đạo) & Đạt \\ \hline
 \end{xltabular}
 
 \section{Kết quả chạy kiểm thử}
@@ -60,9 +63,9 @@ Mỗi tệp kiểm thử dùng CSDL riêng trong thư mục tạm nên kết qu�
   v Học viên thứ 30 vào lớp offline -> ENROLLED; thứ 31 -> chờ duyệt + tờ trình
   v Lãnh đạo "tách lớp" 30 + 12 = 42 -> chia đều 21 / 21, lớp mới có lịch + phòng
   ...
-i tests 72
-i suites 12
-i pass 72
+i tests 78
+i suites 13
+i pass 78
 i fail 0
 \end{PlainCode}
 \captionof{lstlisting}{Kết quả \texttt{npm test} (rút gọn)}\label{lst:testout}
@@ -73,12 +76,35 @@ i fail 0
 \begin{tabular}{|l|c|c|c|}
   \hline
   \headrow \hd{Tệp kiểm thử} & \hd{Số ca} & \hd{Đạt} & \hd{Thời gian} \\ \hline
-  \texttt{rules.test.js} – quy tắc nghiệp vụ & 36 & 36 & $\approx$ 0,1 s \\ \hline
-  \texttt{api.test.js} – tích hợp REST API & 29 & 29 & $\approx$ 1,2 s \\ \hline
-  \texttt{chat.test.js} – Socket.IO & 7 & 7 & $\approx$ 1,1 s \\ \hline
-  \textbf{Tổng} & \textbf{72} & \textbf{72 (100\%)} & \\ \hline
+  \texttt{rules.test.js} – quy tắc nghiệp vụ & 39 & 39 & $\approx$ 0,1 s \\ \hline
+  \texttt{api.test.js} – tích hợp REST API & 31 & 31 & $\approx$ 1,5 s \\ \hline
+  \texttt{chat.test.js} – Socket.IO & 8 & 8 & $\approx$ 1,1 s \\ \hline
+  \textbf{Tổng} & \textbf{78} & \textbf{78 (100\%)} & \\ \hline
 \end{tabular}
 \end{table}
+
+\section{Ma trận truy vết yêu cầu}
+Bảng~\ref{tab:trace} nối từng yêu cầu của đề bài tới use case, mô-đun cài đặt và ca kiểm thử tương ứng, bảo đảm không yêu cầu nào bị bỏ sót và mọi quy tắc nghiệp vụ đều có kiểm thử.
+
+\begin{xltabular}{\linewidth}{|L{2.7cm}|L{1.5cm}|Y|L{3.4cm}|}
+  \caption{Truy vết yêu cầu – use case – mã nguồn – kiểm thử}\label{tab:trace}\\ \hline
+  \headrow \hd{Yêu cầu} & \hd{Use case} & \hd{Mô-đun cài đặt} & \hd{Kiểm thử} \\ \hline
+  \endfirsthead \hline
+  \headrow \hd{Yêu cầu} & \hd{Use case} & \hd{Mô-đun cài đặt} & \hd{Kiểm thử} \\ \hline
+  \endhead
+  FR-01, FR-02 (CN1) & UC-01 & \texttt{services/catalog.js}, \texttt{public/js/portal.js} & API danh mục khoá học \\ \hline
+  FR-03 (CN3) & UC-02 & \texttt{catalog.searchClasses} & API lọc lớp, TC-16 \\ \hline
+  FR-04 (CN2) & UC-03 & \texttt{registration.create}, \texttt{rules.validateRegistration} & TC-09, TC-10 \\ \hline
+  FR-05, FR-06 & UC-04 & \texttt{registration.pay}, \texttt{findByCodeAndPhone} & TC-11, TC-13 \\ \hline
+  FR-07, BR-01 & UC-05 & \texttt{services/placement.js}, \texttt{rules.canTakePlacement} & TC-12, TC-14 \\ \hline
+  FR-08 – FR-10 (CN4) & UC-06 & \texttt{sockets/chat.js}, \texttt{services/chat.js} & TC-25 – TC-28, TC-31 \\ \hline
+  FR-11, BR-06 & UC-07 & \texttt{enrollment.enroll}, \texttt{rules.placementDecision} & TC-03, TC-04 \\ \hline
+  FR-13, BR-04 & UC-08 & \texttt{enrollment.decide}, \texttt{rules.proposeResolution} & TC-05 – TC-07, TC-17 – TC-20, TC-29 \\ \hline
+  FR-12, BR-05, BR-08 & UC-09 & \texttt{enrollment.updateArrangement}, \texttt{openClass}, \texttt{rules.findConflicts}, \texttt{canOpenClass} & TC-08, TC-21 – TC-24 \\ \hline
+  BR-02, BR-03, BR-07 & – & \texttt{rules.evaluateClass}, view \texttt{v\_class\_enrollment} & TC-01, TC-02 \\ \hline
+  FR-14 & UC-10 & \texttt{services/stats.js}, \texttt{public/js/admin.js} & API dashboard \\ \hline
+  Bảo mật, phân quyền & – & \texttt{middleware/auth.js}, \texttt{middleware/throttle.js} & TC-15, TC-16, TC-30 \\ \hline
+\end{xltabular}
 
 \section{Kiểm thử giao diện}
 Ngoài kiểm thử tự động, toàn bộ giao diện được chạy thử trên trình duyệt Chrome (độ phân giải 1440×900 và giả lập điện thoại 390×844) bằng công cụ \texttt{tools/screenshots.js}: công cụ tự đăng nhập từng vai trò, đi qua các màn hình, gõ tin nhắn chat ở cả hai phía và chụp ảnh – các ảnh trong Chương~\ref{ch:impl} được tạo ra từ kịch bản này. Quá trình chạy thử đã giúp phát hiện và sửa các lỗi: đường dẫn thư viện Chart.js bị chặn bởi trường \texttt{exports} của gói; xung đột tên lớp CSS giữa khối người dùng và bong bóng tin nhắn; lớp đang học bị gợi ý ưu tiên cho học viên mới (đã bổ sung trọng số giảm cho lớp đã khai giảng).

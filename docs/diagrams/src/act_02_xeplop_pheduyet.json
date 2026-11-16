@@ -1,0 +1,37 @@
+{
+  "lanes": [{"title": "Giáo vụ", "w": 280}, {"title": "Hệ thống", "w": 560}, {"title": "Lãnh đạo trung tâm", "w": 470}],
+  "nodes": [
+    {"id": "S", "lane": 0, "r": 0, "t": "start"},
+    {"id": "A1", "lane": 0, "r": 1, "label": "Chọn hồ sơ TESTED"},
+    {"id": "B1", "lane": 1, "r": 1, "dx": -140, "label": "Gợi ý lớp: cùng khoá, đúng\nCEFR, ưu tiên hình thức / ca", "w": 236},
+    {"id": "A3", "lane": 0, "r": 2, "label": "Chọn lớp từ danh sách\ngợi ý"},
+    {"id": "B2", "lane": 1, "r": 3, "dx": -140, "t": "dec", "label": "Trình độ lớp =\ntrình độ HV?", "w": 226},
+    {"id": "A4", "lane": 0, "r": 4, "label": "Nhập lý do xếp lệch\ntrình độ"},
+    {"id": "B3", "lane": 1, "r": 5, "dx": -140, "t": "dec", "label": "Hình thức\nlớp?"},
+    {"id": "B7", "lane": 0, "r": 6, "t": "bad", "label": "Nhận thông báo:\nlớp online đã đầy"},
+    {"id": "B4", "lane": 1, "r": 6, "dx": -140, "t": "dec", "label": "Sĩ số < tối đa\nonline?", "w": 226},
+    {"id": "B5", "lane": 1, "r": 6, "dx": 140, "t": "dec", "label": "Sĩ số Offline\n< 30?", "w": 226},
+    {"id": "B6", "lane": 1, "r": 7, "dx": -140, "t": "good", "label": "Hồ sơ → ENROLLED"},
+    {"id": "B8", "lane": 1, "r": 7, "dx": 140, "t": "bad", "label": "Hồ sơ → WAITING_APPROVAL,\nlập / bổ sung tờ trình (BR-04)", "w": 240},
+    {"id": "B9", "lane": 1, "r": 8, "dx": 140, "label": "Tính phương án đề xuất:\nchia đều / tách phần dư / giữ", "w": 236},
+    {"id": "C1", "lane": 2, "r": 8, "t": "dec", "label": "Quyết định"},
+    {"id": "C2", "lane": 2, "r": 9, "dx": -155, "label": "Tách lớp", "w": 130},
+    {"id": "C3", "lane": 2, "r": 9, "label": "Giữ ngoại lệ\n(≤ sức chứa phòng)", "w": 160},
+    {"id": "C4", "lane": 2, "r": 9, "dx": 155, "label": "Từ chối: hồ sơ\nvề TESTED", "w": 130},
+    {"id": "B10", "lane": 1, "r": 10, "dx": 140, "t": "good", "label": "Thực thi quyết định\ntrong 1 giao dịch"},
+    {"id": "E", "lane": 1, "r": 11, "dx": -140, "t": "end"}
+  ],
+  "edges": [
+    {"f": "S", "t": "A1"}, {"f": "A1", "t": "B1"}, {"f": "B1", "t": "A3", "m": "vh"}, {"f": "A3", "t": "B2", "m": "z"},
+    {"f": "B2", "t": "A4", "l": "Không", "m": "hv"}, {"f": "B2", "t": "B3", "l": "Có"},
+    {"f": "A4", "t": "B3", "m": "vh"},
+    {"f": "B3", "t": "B4", "l": "Online"}, {"f": "B3", "t": "B5", "l": "Offline", "m": "hv"},
+    {"f": "B4", "t": "B7", "l": "Không"}, {"f": "B7", "t": "A3", "m": "side"},
+    {"f": "B4", "t": "B6", "l": "Có"},
+    {"f": "B5", "t": "B6", "l": "Có", "m": "z", "sx": -40, "tx": 44}, {"f": "B5", "t": "B8", "l": "Không", "sx": 40, "m": "v"},
+    {"f": "B8", "t": "B9"}, {"f": "B9", "t": "C1"},
+    {"f": "C1", "t": "C2"}, {"f": "C1", "t": "C3"}, {"f": "C1", "t": "C4"},
+    {"f": "C2", "t": "B10"}, {"f": "C3", "t": "B10"}, {"f": "C4", "t": "B10"},
+    {"f": "B6", "t": "E"}, {"f": "B10", "t": "E", "m": "vh"}
+  ]
+}

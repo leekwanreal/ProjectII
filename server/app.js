@@ -10,6 +10,11 @@ function createApp() {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '100kb' }));
+  // Header bảo mật cơ bản
+  app.use((req, res, next) => {
+    res.set({ 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'same-origin' });
+    next();
+  });
 
   const pub = path.join(__dirname, '..', 'public');
   app.use(express.static(pub));

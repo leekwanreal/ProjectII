@@ -66,7 +66,7 @@ Như vậy với $T = 31$ (trường hợp phổ biến nhất – chỉ một h
 
 \begin{rulebox}[Phương án xử lý tờ trình (hàm \texttt{proposeResolution})]
 \begin{enumerate}[leftmargin=1.6em]
-  \item \textbf{Tách lớp – chia đều} (khi $T \geq 40$ và lớp chưa khai giảng): tạo lớp mới cùng khoá, trình độ, lịch; chia $\lceil T/2\rceil + \lfloor T/2\rfloor$, cả hai lớp đủ điều kiện mở.
+  \item \textbf{Tách lớp – chia đều} (khi $T \geq 40$ và lớp chưa khai giảng): chia đều $T$ học viên thành $m = \max(2, \lceil T/30 \rceil)$ lớp (thường $m = 2$; ví dụ $T = 65$ thành $22 + 22 + 21$), mọi lớp đều nằm trong khoảng 20–30 nên đủ điều kiện mở; lớp mới sao chép khoá, trình độ, lịch học.
   \item \textbf{Tách lớp – tách phần dư} (khi $T < 40$ hoặc lớp đang học): giữ 30 học viên ở lớp cũ, chuyển $k$ hồ sơ sang lớp mới ở trạng thái tuyển sinh; lớp mới cần thêm $20 - k$ học viên mới mở được.
   \item \textbf{Giữ ngoại lệ}: cho lớp vượt chuẩn với $T$ học viên – \emph{chỉ khả thi khi sức chứa phòng} $\geq T$ (liên kết với BR-05).
   \item \textbf{Từ chối}: $k$ hồ sơ trở về trạng thái chờ xếp lớp để giáo vụ xếp lớp/ca khác.
@@ -76,9 +76,9 @@ Như vậy với $T = 31$ (trường hợp phổ biến nhất – chỉ một h
 
 \section{Yêu cầu phi chức năng}
 \begin{itemize}
-  \item \textbf{Khả dụng:} giao diện tiếng Việt, responsive trên máy tính và điện thoại, hỗ trợ chế độ sáng/tối; chạy được hoàn toàn offline (không phụ thuộc CDN).
+  \item \textbf{Khả dụng:} giao diện tiếng Việt, responsive trên máy tính và điện thoại; có nút chuyển chế độ sáng/tối (mặc định theo hệ điều hành); thư viện giao diện được phục vụ từ chính máy chủ nên hệ thống vẫn chạy khi không có Internet (phông chữ web tự lùi về phông hệ thống).
   \item \textbf{Hiệu năng thời gian thực:} tin nhắn chat được đẩy tới bên kia qua WebSocket, độ trễ dưới 1 giây trong mạng nội bộ.
-  \item \textbf{Bảo mật – riêng tư:} tra cứu hồ sơ phải khớp cả mã hồ sơ và số điện thoại; mật khẩu nhân viên băm bằng scrypt; API quản trị yêu cầu token ký HMAC có thời hạn; mọi truy vấn SQL đều tham số hoá; nội dung hiển thị được escape chống XSS.
+  \item \textbf{Bảo mật – riêng tư:} tra cứu hồ sơ phải khớp cả mã hồ sơ và số điện thoại; mật khẩu nhân viên băm bằng scrypt; API quản trị yêu cầu token ký HMAC có thời hạn; khoá tạm địa chỉ IP khi nhập sai mật khẩu hoặc tra sai hồ sơ quá nhiều lần; mọi truy vấn SQL đều tham số hoá; nội dung hiển thị được escape chống XSS.
   \item \textbf{Toàn vẹn dữ liệu:} khoá ngoại, ràng buộc \texttt{CHECK}, chỉ mục duy nhất có điều kiện; các thao tác nhiều bước (xếp lớp, phê duyệt, huỷ lớp) chạy trong một giao dịch.
   \item \textbf{Bảo trì:} quy tắc nghiệp vụ tập trung trong một mô-đun hàm thuần, có kiểm thử tự động bao phủ các giá trị biên.
 \end{itemize}
@@ -141,6 +141,22 @@ Hình~\ref{fig:uc0} thể hiện 10 use case chính. Bốn use case tô màu và
   \ucrow{Rẽ nhánh UC-07}{3a. Offline đã đủ 30 → hồ sơ \texttt{WAITING\_APPROVAL}, tạo/bổ sung tờ trình (BR-04).\newline 3b. Online đầy, sai khoá, lớp đã đóng → từ chối kèm lý do.\newline 1a. Lệch trình độ → bắt buộc nhập lý do, lưu vào hồ sơ.}
   \ucrow{Luồng chính UC-08}{1. Lãnh đạo xem tờ trình: sĩ số hiện tại, số hồ sơ chờ, sức chứa phòng, danh sách hồ sơ chờ và phương án đề xuất.\newline 2. Chọn quyết định (tách lớp / giữ ngoại lệ / từ chối) và ghi chú.\newline 3. Hệ thống thực thi trong \textbf{một giao dịch}; ghi người duyệt, thời điểm, lớp mới (nếu tách).}
   \ucrow{Ngoại lệ UC-08}{Giữ ngoại lệ khi phòng không đủ chỗ → 422; tờ trình đã xử lý → 409; người không phải Lãnh đạo → 403.}
+\end{ucspec}
+
+\begin{ucspec}{Đặc tả UC-04 Thanh toán học phí}{tab:uc04}
+  \ucrow{Tác nhân}{Học viên, Cổng thanh toán; hoặc Giáo vụ (thu tiền mặt)}
+  \ucrow{Tiền điều kiện}{Hồ sơ ở trạng thái \texttt{PENDING\_PAYMENT}}
+  \ucrow{Luồng chính}{1. Học viên tra cứu hồ sơ bằng mã hồ sơ + SĐT.\newline 2. Chọn phương thức (VNPay, MoMo, chuyển khoản) và xác nhận.\newline 3. Cổng thanh toán xác nhận giao dịch (mô phỏng).\newline 4. Trong một giao dịch CSDL: tạo bản ghi \texttt{payments} với số tiền bằng học phí khoá, cập nhật hồ sơ sang \texttt{PAID}.}
+  \ucrow{Luồng thay thế}{2a. Học viên nộp tiền mặt tại quầy: giáo vụ bấm “Thu tiền mặt”, hệ thống ghi nhận người thu.}
+  \ucrow{Ngoại lệ}{Hồ sơ đã thanh toán → 409; hồ sơ đã huỷ → 409; tra sai mã/SĐT nhiều lần → 429 (khoá tạm).}
+\end{ucspec}
+
+\begin{ucspec}{Đặc tả UC-09 Lập lịch, phân phòng, mở lớp}{tab:uc09}
+  \ucrow{Tác nhân}{Giáo vụ}
+  \ucrow{Tiền điều kiện}{Lớp ở trạng thái \texttt{RECRUITING} hoặc \texttt{IN\_PROGRESS}}
+  \ucrow{Luồng chính}{1. Giáo vụ mở chi tiết lớp; hệ thống hiển thị sĩ số, danh sách học viên và các lý do lớp chưa đủ điều kiện mở (nếu có).\newline 2. Chọn giảng viên, phòng học (lớp Offline) và các buổi học theo thứ – ca.\newline 3. Hệ thống kiểm tra BR-05: sức chứa phòng, trùng phòng, trùng giảng viên trong khoảng thời gian học giao nhau; hợp lệ thì lưu.\newline 4. Giáo vụ bấm “Mở lớp”; hệ thống kiểm tra BR-08 rồi chuyển lớp sang \texttt{IN\_PROGRESS}.}
+  \ucrow{Ngoại lệ}{3a. Trùng lịch → 422 kèm tên lớp và buổi bị trùng.\newline 4a. Chưa đủ sĩ số tối thiểu, còn tờ trình chờ, hoặc lớp Offline chưa có phòng → 422 kèm danh sách lý do.}
+  \ucrow{Luồng thay thế}{Huỷ lớp đang tuyển sinh: các hồ sơ trong lớp trở về \texttt{TESTED}, tờ trình đang chờ (nếu có) được đóng.}
 \end{ucspec}
 
 \section{Ma trận phân quyền}

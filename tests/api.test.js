@@ -233,3 +233,34 @@ describe('Lịch học, phòng học, mở lớp (BR-05, BR-08)', () => {
     assert.equal(counts(cls.class_id).enrolled, 0);
   });
 });
+
+describe('Tách thành nhiều lớp và chống dò mật khẩu', () => {
+  test('30 + 35 hồ sơ chờ → tách 3 lớp 22 / 22 / 21, mỗi lớp mới có giảng viên không trùng lịch', async () => {
+    const d = t.db.get();
+    const cls = classByCode('IELTS-F-A2-OFF-02'); // đang 24 học viên
+    const insS = d.prepare('INSERT INTO students (full_name, phone, email) VALUES (?, ?, ?)');
+    const insR = d.prepare("INSERT INTO registrations (reg_code, student_id, course_id, desired_form, desired_shift, class_id, status) VALUES (?, ?, ?, 'OFFLINE', 'EVENING', ?, ?)");
+    for (let i = 0; i < 41; i++) {
+      const sid = insS.run(`Học Viên Đông ${i}`, `098${String(1000000 + i)}`, `dong${i}@test.vn`).lastInsertRowid;
+      insR.run(`DK-2099-${String(i).padStart(4, '0')}`, sid, cls.course_id, cls.class_id, i < 6 ? 'ENROLLED' : 'WAITING_APPROVAL');
+    }
+    const reqId = d.prepare("INSERT INTO approval_requests (class_id, reason, proposed_action) VALUES (?, 'Kiểm thử 30 + 35', 'SPLIT')").run(cls.class_id).lastInsertRowid;
+    assert.deepEqual(counts(cls.class_id), { enrolled: 30, waiting: 35 });
+    const r = await t.api('POST', `/api/admin/approvals/${reqId}/decide`, { decision: 'SPLIT' }, tok.lanhdao);
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    const children = d.prepare('SELECT * FROM classes WHERE parent_class_id = ? ORDER BY class_id').all(cls.class_id);
+    assert.equal(children.length, 2);
+    const sizes = [cls, ...children].map((c) => counts(c.class_id).enrolled);
+    assert.deepEqual(sizes, [22, 22, 21]);
+    assert.equal(counts(cls.class_id).waiting, 0);
+    assert.notEqual(children[0].teacher_id, children[1].teacher_id); // cùng lịch nên phải khác giảng viên
+    assert.ok(!children[0].room_id || children[0].room_id !== children[1].room_id);
+  });
+  test('Sai mật khẩu 8 lần liên tiếp → lần thứ 9 bị khoá tạm (429) kể cả khi nhập đúng', async () => {
+    assert.equal((await t.api('POST', '/api/auth/login', { username: 'giaovu', password: '123456' })).status, 200); // đăng nhập đúng xoá bộ đếm
+    for (let i = 0; i < 8; i++) assert.equal((await t.api('POST', '/api/auth/login', { username: 'giaovu', password: 'sai' + i })).status, 401);
+    const r = await t.api('POST', '/api/auth/login', { username: 'giaovu', password: '123456' });
+    assert.equal(r.status, 429);
+    assert.equal(r.body.error, 'TOO_MANY_ATTEMPTS');
+  });
+});

@@ -1,6 +1,10 @@
 // Cấu hình tập trung: ngưỡng sĩ số theo đề bài + tham số vận hành.
 const path = require('path');
 
+if (process.env.NODE_ENV === 'production' && !process.env.TOKEN_SECRET) {
+  console.warn('CẢNH BÁO: chưa đặt biến môi trường TOKEN_SECRET – đang dùng khoá mặc định chỉ dành cho phát triển.');
+}
+
 module.exports = {
   PORT: Number(process.env.PORT) || 3000,
   DB_PATH: process.env.DB_PATH || path.join(__dirname, '..', 'database.sqlite'),

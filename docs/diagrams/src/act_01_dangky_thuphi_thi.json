@@ -1,0 +1,35 @@
+{
+  "lanes": [{"title": "Học viên", "w": 270}, {"title": "Hệ thống", "w": 560}, {"title": "Cổng thanh toán", "w": 260}, {"title": "Văn phòng (Giáo vụ)", "w": 260}],
+  "nodes": [
+    {"id": "S", "lane": 0, "r": 0, "t": "start"},
+    {"id": "A1", "lane": 0, "r": 1, "label": "Chọn khoá / lớp,\nmở form đăng ký"},
+    {"id": "A2", "lane": 0, "r": 2, "label": "Nhập thông tin cá nhân,\nhình thức, ca mong muốn"},
+    {"id": "B1", "lane": 1, "r": 2, "dx": -140, "t": "dec", "label": "Dữ liệu\nhợp lệ?"},
+    {"id": "B3", "lane": 1, "r": 3, "dx": -140, "t": "dec", "label": "Đã có hồ sơ\ncùng khoá?"},
+    {"id": "B8", "lane": 1, "r": 3, "dx": 140, "t": "bad", "label": "Báo lỗi từng trường /\nbáo trùng hồ sơ"},
+    {"id": "A5", "lane": 0, "r": 4, "label": "Nhận mã hồ sơ\nDK-YYYY-NNNN"},
+    {"id": "B2", "lane": 1, "r": 4, "dx": -140, "label": "Tìm / tạo học viên, tạo hồ sơ\nPENDING_PAYMENT", "w": 236},
+    {"id": "A6", "lane": 0, "r": 5, "label": "Chọn phương thức\nthanh toán"},
+    {"id": "C1", "lane": 2, "r": 5, "t": "dec", "label": "Giao dịch\nthành công?"},
+    {"id": "B4", "lane": 1, "r": 6, "dx": -140, "t": "good", "label": "Ghi nhận payment,\nhồ sơ → PAID"},
+    {"id": "B5", "lane": 1, "r": 7, "dx": -140, "t": "dec", "label": "Hồ sơ đã PAID?\n(BR-01)"},
+    {"id": "B6", "lane": 1, "r": 7, "dx": 140, "t": "bad", "label": "Từ chối 403: yêu cầu\nnộp học phí"},
+    {"id": "A9", "lane": 0, "r": 8, "label": "Làm bài kiểm tra\n20 câu / 20 phút"},
+    {"id": "X", "lane": 1, "r": 8, "dx": 140, "t": "end"},
+    {"id": "B7", "lane": 1, "r": 9, "dx": -140, "t": "good", "label": "Chấm điểm, quy đổi CEFR,\nhồ sơ → TESTED", "w": 226},
+    {"id": "D1", "lane": 3, "r": 10, "label": "Nhận kết quả kiểm tra\nđể xếp lớp"},
+    {"id": "E", "lane": 3, "r": 11, "t": "end"}
+  ],
+  "edges": [
+    {"f": "S", "t": "A1"}, {"f": "A1", "t": "A2"}, {"f": "A2", "t": "B1"},
+    {"f": "B1", "t": "B8", "l": "Không", "m": "hv", "ldy": 26}, {"f": "B1", "t": "B3", "l": "Có"},
+    {"f": "B3", "t": "B8", "l": "Có"}, {"f": "B3", "t": "B2", "l": "Không"},
+    {"f": "B8", "t": "A2", "m": "side", "side": "r", "cx": 812, "ty": -16},
+    {"f": "B2", "t": "A5"}, {"f": "A5", "t": "A6"}, {"f": "A6", "t": "C1"},
+    {"f": "C1", "t": "A6", "l": "Không", "m": "n", "tx": 50},
+    {"f": "C1", "t": "B4", "l": "Có", "m": "vh"},
+    {"f": "B4", "t": "B5"}, {"f": "B5", "t": "B6", "l": "Chưa"}, {"f": "B6", "t": "X"},
+    {"f": "B5", "t": "A9", "l": "Rồi", "m": "vh"}, {"f": "A9", "t": "B7", "m": "vh"},
+    {"f": "B7", "t": "D1", "m": "vh"}, {"f": "D1", "t": "E"}
+  ]
+}

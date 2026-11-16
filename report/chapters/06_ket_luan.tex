@@ -6,7 +6,7 @@
   \item \textbf{Phân tích:} bóc tách đề bài thành 14 yêu cầu chức năng và 8 quy tắc nghiệp vụ có mã truy vết; làm rõ các điểm đề bài chưa quy định (sĩ số tối đa lớp online, ý nghĩa của “tách lớp”) bằng giả định tường minh.
   \item \textbf{Thiết kế:} 21 biểu đồ UML/ERD dạng mã nguồn (6 use case, 4 hoạt động, 4 tuần tự, 3 trạng thái, 2 lớp, 1 ERD, 1 kiến trúc); CSDL 14 bảng chuẩn 3NF với ràng buộc nghiệp vụ được cưỡng chế ngay trong CSDL.
   \item \textbf{Cài đặt:} ứng dụng web hoàn chỉnh gồm cổng học viên (4 chức năng bắt buộc + thanh toán + kiểm tra đầu vào) và dashboard văn phòng cho 3 vai trò; chat thời gian thực có hàng đợi, khôi phục phiên, chỉ báo đang soạn tin; dashboard thống kê trực quan.
-  \item \textbf{Chất lượng:} 72 ca kiểm thử tự động đạt 100\%, bao phủ toàn bộ quy tắc sĩ số ở các giá trị biên và các luồng nghiệp vụ đầu – cuối.
+  \item \textbf{Chất lượng:} 78 ca kiểm thử tự động đạt 100\%, bao phủ toàn bộ quy tắc sĩ số ở các giá trị biên và các luồng nghiệp vụ đầu – cuối.
   \item \textbf{Phát hiện trong phân tích:} chia đôi lớp chỉ hợp lệ khi tổng sĩ số $\geq 40$; hệ thống tự đề xuất phương án phù hợp (chia đều, tách phần dư, giữ ngoại lệ theo sức chứa phòng) giúp Lãnh đạo quyết định nhanh và đúng.
 \end{itemize}
 
@@ -15,7 +15,8 @@
   \item Cổng thanh toán và việc gửi thông báo (email/SMS) mới ở mức mô phỏng.
   \item Chưa có chức năng điểm danh, nhập điểm từng buổi và đánh giá cuối khoá để “lưu trữ toàn bộ quá trình đào tạo” ở mức chi tiết.
   \item Ngân hàng câu hỏi kiểm tra đầu vào còn nhỏ (45 câu) và mới có dạng trắc nghiệm; chưa kiểm tra kỹ năng nghe, nói, viết.
-  \item SQLite phù hợp quy mô một trung tâm; khi mở rộng nhiều cơ sở cần chuyển sang hệ quản trị CSDL máy chủ.
+  \item SQLite phù hợp quy mô một trung tâm; khi mở rộng nhiều cơ sở cần chuyển sang hệ quản trị CSDL máy chủ. Bộ đếm chống dò mật khẩu lưu trong bộ nhớ nên chỉ đúng với một tiến trình máy chủ.
+  \item Token đăng nhập lưu ở \texttt{localStorage} của trình duyệt; bản triển khai thật nên dùng cookie \texttt{HttpOnly} và HTTPS.
 \end{itemize}
 
 \section{Hướng phát triển}

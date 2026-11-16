@@ -91,22 +91,35 @@ function placementDecision({ cls, enrolled, registration, studentLevel, reason }
  * - Giữ ngoại lệ: chỉ khả thi khi phòng hiện tại đủ chỗ (hoặc chưa gán phòng).
  */
 function proposeResolution({ enrolled, waiting, roomCapacity = null, inProgress = false }) {
-  const { min } = CAPACITY.OFFLINE;
+  const { min, max } = CAPACITY.OFFLINE;
   const total = enrolled + waiting;
   // Lớp đang học thì không xáo trộn học viên cũ: chỉ tách phần dư.
   const even = !inProgress && total >= 2 * min;
-  const split = even
-    ? { feasible: true, mode: 'EVEN', sizes: [Math.ceil(total / 2), Math.floor(total / 2)], note: `Chia đều ${total} học viên thành 2 lớp ${Math.ceil(total / 2)} + ${Math.floor(total / 2)}, cả hai đều đủ điều kiện mở (≥ ${min}).` }
-    : { feasible: true, mode: 'REMAINDER', sizes: [enrolled, waiting], note: `Giữ ${enrolled} học viên ở lớp cũ, chuyển ${waiting} học viên sang lớp mới; lớp mới cần tuyển thêm ${Math.max(0, min - waiting)} học viên để đủ điều kiện mở.` };
+  let split;
+  if (even) {
+    // Số lớp ít nhất để không lớp nào vượt 30; với tổng >= 40 mọi lớp sau khi chia đều >= 20.
+    const sizes = balanced(total, Math.max(2, Math.ceil(total / max)));
+    split = { feasible: true, mode: 'EVEN', sizes, note: `Chia đều ${total} học viên thành ${sizes.length} lớp ${sizes.join(' + ')}, tất cả đều đủ điều kiện mở (≥ ${min}).` };
+  } else {
+    const extra = balanced(waiting, Math.max(1, Math.ceil(waiting / max)));
+    const need = extra.map((n) => Math.max(0, min - n)).filter(Boolean);
+    split = { feasible: true, mode: 'REMAINDER', sizes: [enrolled, ...extra], note: `Giữ ${enrolled} học viên ở lớp cũ, chuyển ${waiting} học viên sang ${extra.length > 1 ? extra.length + ' lớp mới' : 'lớp mới'}${need.length ? `; lớp mới cần tuyển thêm ${need.join(', ')} học viên để đủ điều kiện mở` : ''}.` };
+  }
   const keepFeasible = roomCapacity == null || roomCapacity >= total;
   const keep = {
     feasible: keepFeasible,
     note: keepFeasible
-      ? `Giữ nguyên lớp với ${total} học viên (vượt chuẩn ${total - CAPACITY.OFFLINE.max}).`
+      ? `Giữ nguyên lớp với ${total} học viên (vượt chuẩn ${total - max}).`
       : `Không khả thi: phòng hiện tại chỉ chứa ${roomCapacity} chỗ < ${total}.`,
   };
   const recommended = even || !keepFeasible ? 'SPLIT' : 'KEEP';
   return { total, recommended, options: { SPLIT: split, KEEP: keep, REJECT: { feasible: true, note: 'Từ chối: hồ sơ chờ trở về trạng thái chưa xếp lớp để xếp lớp/ca khác.' } } };
+}
+
+/** Chia total thành k phần chênh nhau không quá 1 (phần lớn hơn đứng trước). */
+function balanced(total, k) {
+  const base = Math.floor(total / k);
+  return Array.from({ length: k }, (_, i) => base + (i < total % k ? 1 : 0));
 }
 
 /** Kiểm tra 2 khoảng ngày [a1,a2] và [b1,b2] có giao nhau không (chuỗi ISO yyyy-mm-dd). */

@@ -56,7 +56,7 @@ Trong quá trình phân tích, một số điểm đề bài không quy định 
 \section{Phương pháp và công cụ}
 \begin{itemize}
   \item \textbf{Phương pháp:} phân tích thiết kế hướng đối tượng với UML 2.5 \cite{omg, fowler}; đặc tả use case theo khuôn mẫu của Cockburn \cite{cockburn}; quy trình phát triển lặp: phân tích → thiết kế → cài đặt → kiểm thử \cite{sommerville}.
-  \item \textbf{Biểu đồ:} viết dưới dạng mã Mermaid \cite{mermaid} (\textit{diagram as code}) trong thư mục \texttt{docs/diagrams/src}, render cục bộ thành ảnh PNG độ phân giải cao bằng \texttt{npm run diagrams} – thay đổi thiết kế chỉ cần sửa văn bản và render lại.
+  \item \textbf{Biểu đồ:} viết dưới dạng mã nguồn (\textit{diagram as code}) trong thư mục \texttt{docs/diagrams/src}: use case, tuần tự, trạng thái, lớp, ERD dùng Mermaid \cite{mermaid}; riêng biểu đồ hoạt động cần các làn (swimlane) thẳng hàng nên được mô tả bằng tệp JSON và vẽ bằng công cụ tự viết \texttt{tools/render-swimlanes.js}. Lệnh \texttt{npm run diagrams} render toàn bộ thành ảnh PNG ngay trên máy – thay đổi thiết kế chỉ cần sửa văn bản và render lại.
   \item \textbf{Lập trình web:} Node.js 24, Express 5 \cite{express}, Socket.IO 4 \cite{socketio}, SQLite qua better-sqlite3 \cite{sqlite, bsqlite}, HTML/CSS/JavaScript thuần, Chart.js \cite{chartjs}.
   \item \textbf{Kiểm thử:} bộ kiểm thử tích hợp sẵn của Node.js (\texttt{node:test}) \cite{nodetest}.
   \item \textbf{Báo cáo:} \LaTeX{} (XeLaTeX, MiKTeX) với phông Times New Roman.

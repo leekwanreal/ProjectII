@@ -1,8 +1,8 @@
 stateDiagram-v2
-  direction LR
+  direction TB
   [*] --> RECRUITING: Giáo vụ tạo lớp
   state RECRUITING {
-    direction LR
+    direction TB
     BELOW_MIN --> ELIGIBLE: sĩ số ≥ 10 (Online) / 20 (Offline)
     ELIGIBLE --> BELOW_MIN: lớp khác nhận lại HV
     ELIGIBLE --> FULL: Offline đạt 30

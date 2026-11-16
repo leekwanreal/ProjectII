@@ -6,7 +6,11 @@ const registration = require('../services/registration');
 const placement = require('../services/placement');
 const auth = require('../services/auth');
 
+const { failureThrottle } = require('../middleware/throttle');
+
 const r = express.Router();
+const loginGuard = failureThrottle({ max: 8, failStatuses: [401] });    // 8 lần sai mật khẩu / 10 phút / IP
+const lookupGuard = failureThrottle({ max: 15, failStatuses: [404] });  // 15 lần tra sai mã hồ sơ – SĐT
 
 r.get('/meta', (req, res) => {
   res.json({
@@ -33,26 +37,26 @@ r.get('/classes/:id', (req, res) => res.json(catalog.getClass(Number(req.params.
 
 // Chức năng 2 – Đăng ký
 r.post('/registrations', (req, res) => res.status(201).json(registration.create(req.body || {})));
-r.post('/registrations/lookup', (req, res) => {
+r.post('/registrations/lookup', lookupGuard, (req, res) => {
   const reg = registration.findByCodeAndPhone(req.body.code, req.body.phone);
   res.json(reg);
 });
-r.post('/registrations/:code/pay', (req, res) => {
+r.post('/registrations/:code/pay', lookupGuard, (req, res) => {
   const reg = registration.findByCodeAndPhone(req.params.code, req.body.phone);
   res.json(registration.pay(reg, req.body.method));
 });
 
 // Kiểm tra đầu vào
-r.post('/placement/:code/start', (req, res) => {
+r.post('/placement/:code/start', lookupGuard, (req, res) => {
   const reg = registration.findByCodeAndPhone(req.params.code, req.body.phone);
   res.json(placement.start(reg));
 });
-r.post('/placement/:code/submit', (req, res) => {
+r.post('/placement/:code/submit', lookupGuard, (req, res) => {
   const reg = registration.findByCodeAndPhone(req.params.code, req.body.phone);
   res.json(placement.submit(reg, req.body.answers));
 });
 
 // Đăng nhập nhân viên
-r.post('/auth/login', (req, res) => res.json(auth.login(req.body.username, req.body.password)));
+r.post('/auth/login', loginGuard, (req, res) => res.json(auth.login(req.body.username, req.body.password)));
 
 module.exports = r;

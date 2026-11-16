@@ -1,0 +1,21 @@
+{
+  "lanes": [{"title": "Khách", "w": 560}, {"title": "Hệ thống", "w": 520}],
+  "nodes": [
+    {"id": "S", "lane": 0, "r": 0, "dx": -110, "t": "start"},
+    {"id": "A1", "lane": 0, "r": 1, "dx": -110, "label": "Nhập từ khoá / chọn bộ lọc:\nchứng chỉ, hình thức, ca,\ntrình độ, khai giảng, còn chỗ", "w": 240},
+    {"id": "B1", "lane": 1, "r": 1, "dx": -140, "label": "Chuẩn hoá tham số, dựng\ntruy vấn có tham số", "w": 226},
+    {"id": "B2", "lane": 1, "r": 2, "dx": -140, "label": "Tính sĩ số và trạng thái sĩ số\ntheo BR-02, BR-03", "w": 236},
+    {"id": "B3", "lane": 1, "r": 3, "dx": -140, "t": "dec", "label": "Có kết quả?"},
+    {"id": "A3", "lane": 0, "r": 4, "dx": -135, "label": "Xem kết quả, chọn\n“Đăng ký lớp này”"},
+    {"id": "B4", "lane": 1, "r": 4, "dx": -140, "t": "good", "label": "Hiển thị thẻ lớp + trạng thái:\nChưa đủ / Đủ mở / Đầy / Chờ duyệt", "w": 256},
+    {"id": "A4", "lane": 0, "r": 5, "dx": 140, "label": "Xoá / nới bộ lọc"},
+    {"id": "B5", "lane": 1, "r": 5, "dx": 135, "t": "bad", "label": "Thông báo không có\nlớp phù hợp"},
+    {"id": "E", "lane": 0, "r": 6, "dx": -135, "t": "end"}
+  ],
+  "edges": [
+    {"f": "S", "t": "A1"}, {"f": "A1", "t": "B1"}, {"f": "B1", "t": "B2"}, {"f": "B2", "t": "B3"},
+    {"f": "B3", "t": "B4", "l": "Có"}, {"f": "B4", "t": "A3"}, {"f": "A3", "t": "E"},
+    {"f": "B3", "t": "B5", "l": "Không", "m": "hv"}, {"f": "B5", "t": "A4"},
+    {"f": "A4", "t": "A1", "m": "hv", "tx": 105}
+  ]
+}

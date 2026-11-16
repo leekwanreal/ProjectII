@@ -1,0 +1,33 @@
+{
+  "lanes": [{"title": "Khách / Học viên", "w": 290}, {"title": "Hệ thống (Socket.IO)", "w": 560}, {"title": "Tư vấn viên", "w": 280}],
+  "nodes": [
+    {"id": "S", "lane": 0, "r": 0, "t": "start"},
+    {"id": "A1", "lane": 0, "r": 1, "label": "Mở widget chat"},
+    {"id": "B0", "lane": 1, "r": 1, "dx": -140, "t": "dec", "label": "Có sessionId\nđã lưu?"},
+    {"id": "A2", "lane": 0, "r": 2, "label": "Nhập tên, liên hệ,\nchủ đề"},
+    {"id": "B1b", "lane": 1, "r": 2, "dx": 140, "t": "good", "label": "Khôi phục phiên\n+ lịch sử tin nhắn"},
+    {"id": "B1", "lane": 1, "r": 3, "dx": -140, "label": "Tạo phiên WAITING,\nđưa vào hàng đợi"},
+    {"id": "B2", "lane": 1, "r": 4, "dx": -140, "label": "Thông báo hàng đợi\ntới tư vấn viên"},
+    {"id": "C1", "lane": 2, "r": 4, "label": "Xem hàng đợi,\nnhận phiên"},
+    {"id": "B3", "lane": 1, "r": 5, "dx": -140, "t": "good", "label": "Phiên → ACTIVE,\ngửi tin hệ thống"},
+    {"id": "A4", "lane": 0, "r": 6, "label": "Gửi câu hỏi"},
+    {"id": "B4", "lane": 1, "r": 7, "dx": -140, "label": "Lưu tin nhắn,\nphát tới phòng chat"},
+    {"id": "C3", "lane": 2, "r": 7, "label": "Trả lời"},
+    {"id": "B4c", "lane": 1, "r": 8, "dx": -140, "label": "Lưu và chuyển\nphản hồi"},
+    {"id": "A6", "lane": 0, "r": 9, "label": "Đọc phản hồi"},
+    {"id": "A7", "lane": 0, "r": 10, "t": "dec", "label": "Còn câu hỏi?"},
+    {"id": "B5", "lane": 1, "r": 11, "dx": -140, "label": "Kết thúc phiên:\n→ CLOSED"},
+    {"id": "E", "lane": 1, "r": 12, "dx": -140, "t": "end"}
+  ],
+  "edges": [
+    {"f": "S", "t": "A1"}, {"f": "A1", "t": "B0"},
+    {"f": "B0", "t": "A2", "l": "Không", "m": "vh"}, {"f": "B0", "t": "B1b", "l": "Có", "m": "hv"},
+    {"f": "A2", "t": "B1", "m": "vh"}, {"f": "B1", "t": "B2"}, {"f": "B2", "t": "C1"},
+    {"f": "C1", "t": "B3", "m": "vh"}, {"f": "B3", "t": "A4", "m": "vh"},
+    {"f": "B1b", "t": "A4", "m": "side", "side": "r", "cx": 832, "ty": 14},
+    {"f": "A4", "t": "B4", "m": "vh"}, {"f": "B4", "t": "C3"}, {"f": "C3", "t": "B4c", "m": "vh"},
+    {"f": "B4c", "t": "A6", "m": "vh"}, {"f": "A6", "t": "A7"},
+    {"f": "A7", "t": "A4", "l": "Có", "m": "side"},
+    {"f": "A7", "t": "B5", "l": "Không", "m": "vh"}, {"f": "B5", "t": "E"}
+  ]
+}

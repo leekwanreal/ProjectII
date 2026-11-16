@@ -13,7 +13,7 @@
   Giao diện & HTML5, CSS3, JavaScript thuần & Không cần bước build; hệ thống thiết kế tự viết (biến CSS, chế độ sáng/tối) \\ \hline
   Biểu đồ thống kê & Chart.js 4 & Phục vụ cục bộ từ \texttt{node\_modules}, chạy offline \\ \hline
   Kiểm thử & \texttt{node:test}, socket.io-client & Có sẵn trong Node.js, không cần thư viện ngoài \\ \hline
-  Biểu đồ UML & Mermaid CLI & Biểu đồ dạng mã, render cục bộ bằng trình duyệt có sẵn \\ \hline
+  Biểu đồ UML & Mermaid CLI, công cụ swimlane tự viết & Biểu đồ dạng mã, render cục bộ bằng trình duyệt có sẵn \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -29,20 +29,21 @@ ProjectII/
 |   |-- services/           catalog, registration, placement, enrollment, chat, stats, auth
 |   |-- routes/             public.js (cổng học viên), admin.js (văn phòng)
 |   |-- sockets/chat.js     sự kiện chat realtime
-|   |-- middleware/auth.js  kiểm tra token + vai trò
+|   |-- middleware/         auth.js (token + vai trò), throttle.js (chống dò mật khẩu)
 |   `-- db/                 schema.sql, connection.js, seed.js, questions.js
 |-- public/                 index.html (cổng học viên), admin.html (dashboard), css/, js/
 |-- tests/                  rules.test.js, api.test.js, chat.test.js
 |-- docs/                   analysis/*.md, diagrams/src/*.mmd -> diagrams/png/*.png
-|-- tools/                  render-diagrams.js, screenshots.js
+|-- tools/                  render-diagrams.js, render-swimlanes.js, screenshots.js
 `-- report/                 báo cáo LaTeX (main.tex, chapters/, images/)
 \end{PlainCode}
 \captionof{lstlisting}{Cấu trúc thư mục dự án}\label{lst:tree}
 \end{figure}
-Toàn bộ dự án gồm khoảng 4\,200 dòng mã (JavaScript, SQL, HTML, CSS), không tính thư viện.
+Toàn bộ dự án gồm khoảng 4\,500 dòng mã (JavaScript, SQL, HTML, CSS), không tính thư viện.
 
 \section{Cài đặt bộ quy tắc nghiệp vụ}
 Mọi quy tắc sĩ số nằm trong \texttt{server/domain/rules.js}. Đoạn mã~\ref{lst:decision} là hàm quyết định khi giáo vụ xếp một hồ sơ vào lớp – ánh xạ trực tiếp BR-02, BR-04, BR-06.
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=JavaScript,caption={Hàm \texttt{placementDecision} (rút gọn)},label=lst:decision]
 function placementDecision({ cls, enrolled, registration, studentLevel, reason }) {
   if (registration.status !== 'TESTED')
@@ -62,24 +63,30 @@ function placementDecision({ cls, enrolled, registration, studentLevel, reason }
   return { action: 'ENROLL', code: 'OK' };
 }
 \end{lstlisting}
+\end{minipage}\par\medskip
 
-Đoạn mã~\ref{lst:propose} hiện thực phân tích ở mục~\ref{sec:br}: chỉ chia đều khi tổng sĩ số đủ để cả hai lớp đạt ngưỡng 20.
-\begin{lstlisting}[language=JavaScript,caption={Hàm \texttt{proposeResolution} – phương án xử lý tờ trình},label=lst:propose]
+Đoạn mã~\ref{lst:propose} hiện thực phân tích ở mục~\ref{sec:br}: chỉ chia đều khi tổng sĩ số đủ để mọi lớp đạt ngưỡng 20, và số lớp được chọn nhỏ nhất sao cho không lớp nào vượt 30.
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=JavaScript,caption={Hàm \texttt{proposeResolution} – phương án xử lý tờ trình (rút gọn)},label=lst:propose]
 function proposeResolution({ enrolled, waiting, roomCapacity = null, inProgress = false }) {
-  const { min } = CAPACITY.OFFLINE;                 // 20
+  const { min, max } = CAPACITY.OFFLINE;            // 20, 30
   const total = enrolled + waiting;
-  const even = !inProgress && total >= 2 * min;     // 40: hai lớp đều >= 20
+  const even = !inProgress && total >= 2 * min;     // 40: mọi lớp sau khi chia đều >= 20
   const split = even
-    ? { mode: 'EVEN', sizes: [Math.ceil(total / 2), Math.floor(total / 2)] }
-    : { mode: 'REMAINDER', sizes: [enrolled, waiting] };   // lớp mới tiếp tục tuyển sinh
+    ? { mode: 'EVEN', sizes: balanced(total, Math.max(2, Math.ceil(total / max))) }
+    : { mode: 'REMAINDER',                          // lớp mới tiếp tục tuyển sinh
+        sizes: [enrolled, ...balanced(waiting, Math.max(1, Math.ceil(waiting / max)))] };
   const keepFeasible = roomCapacity == null || roomCapacity >= total;  // BR-05
   const recommended = even || !keepFeasible ? 'SPLIT' : 'KEEP';
   return { total, recommended, options: { SPLIT: split, KEEP: { feasible: keepFeasible }, REJECT: {} } };
 }
+// balanced(65, 3) -> [22, 22, 21]: chia thành k phần chênh nhau không quá 1
 \end{lstlisting}
+\end{minipage}\par\medskip
 
 \section{Cài đặt giao dịch xếp lớp và phê duyệt}
 Các thao tác thay đổi nhiều bảng được bọc trong \texttt{db.tx()} (giao dịch của better-sqlite3): nếu bất kỳ bước nào ném lỗi, toàn bộ thay đổi bị huỷ. Khi Lãnh đạo chọn \emph{tách lớp}, hệ thống trong cùng một giao dịch: tạo lớp mới (sao chép khoá, trình độ, hình thức, lịch học, gắn \texttt{parent\_class\_id}); tự tìm giảng viên và phòng còn trống không trùng lịch (BR-05); chuyển các hồ sơ chờ sang lớp mới; nếu chia đều thì chuyển thêm những học viên được xếp muộn nhất; cuối cùng cập nhật tờ trình.
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=JavaScript,caption={Xếp lớp: lập hoặc bổ sung tờ trình trong cùng giao dịch (rút gọn)},label=lst:enroll]
 function enroll(regId, classId, reason, staffId) {
   return db.tx(() => {
@@ -99,6 +106,7 @@ function enroll(regId, classId, reason, staffId) {
   });
 }
 \end{lstlisting}
+\end{minipage}\par\medskip
 Chỉ mục duy nhất có điều kiện \texttt{ux\_pending\_request ON approval\_requests(class\_id) WHERE status = 'PENDING'} bảo đảm kể cả khi hai giáo vụ thao tác đồng thời cũng không thể sinh hai tờ trình cho cùng một lớp.
 
 \section{Cài đặt chat thời gian thực}
@@ -109,7 +117,7 @@ Chỉ mục duy nhất có điều kiện \texttt{ux\_pending\_request ON approv
   \headrow \hd{Sự kiện} & \hd{Phía gửi} & \hd{Xử lý} \\ \hline
   \texttt{chat:start} & Khách & Tạo phiên WAITING, gửi lời chào, phát \texttt{queue:update} tới phòng \texttt{consultants} \\ \hline
   \texttt{chat:resume} & Khách / NV & Tham gia lại phòng \texttt{session:<id>}, trả lịch sử tin nhắn \\ \hline
-  \texttt{chat:claim} & Tư vấn viên & \texttt{UPDATE ... WHERE status = 'WAITING'} – chỉ một người nhận được; phiên ACTIVE \\ \hline
+  \texttt{chat:claim} & Tư vấn viên & Chỉ vai trò Tư vấn viên/Lãnh đạo; \texttt{UPDATE ... WHERE status = 'WAITING'} – chỉ một người nhận được; phiên ACTIVE \\ \hline
   \texttt{chat:message} & Hai phía & Kiểm tra quyền (khách đúng phiên, tư vấn viên đã nhận phiên), lưu CSDL rồi phát tới phòng \\ \hline
   \texttt{chat:typing} & Hai phía & Chuyển tiếp chỉ báo “đang soạn tin” \\ \hline
   \texttt{chat:close} & Hai phía & Phiên CLOSED, gửi tin hệ thống, phát \texttt{chat:closed} \\ \hline
@@ -124,6 +132,8 @@ Tư vấn viên kết nối socket kèm token trong \texttt{handshake.auth}; má
   \item \textbf{SQL injection:} 100\% truy vấn dùng placeholder \texttt{?}; kiểm thử với chuỗi \verb|' OR 1=1 --| trả về danh sách rỗng.
   \item \textbf{XSS:} mọi dữ liệu người dùng (tên, tin nhắn chat) được escape trước khi chèn vào HTML.
   \item \textbf{Dữ liệu cá nhân:} tra cứu hồ sơ phải khớp cả mã và SĐT; sai một trong hai đều trả cùng thông báo 404 để không lộ thông tin.
+  \item \textbf{Chống dò tìm:} middleware \texttt{failureThrottle} đếm số lần thất bại theo địa chỉ IP – sai mật khẩu 8 lần hoặc tra sai mã hồ sơ/SĐT 15 lần trong 10 phút thì bị khoá tạm (HTTP 429); thao tác thành công sẽ xoá bộ đếm.
+  \item \textbf{Header bảo mật:} \texttt{X-Content-Type-Options: nosniff}, \texttt{X-Frame-Options: DENY}, \texttt{Referrer-Policy: same-origin}; khoá ký token lấy từ biến môi trường \texttt{TOKEN\_SECRET} khi triển khai.
 \end{itemize}
 
 \section{Kết quả giao diện}

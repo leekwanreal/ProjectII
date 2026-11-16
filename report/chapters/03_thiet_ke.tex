@@ -9,7 +9,7 @@ Phía máy chủ được tổ chức phân tầng (Hình~\ref{fig:layers}): t�
 \fig[0.8\linewidth]{cls_02_layers}{Biểu đồ lớp thiết kế phân tầng phía máy chủ}{fig:layers}
 
 \section{Biểu đồ hoạt động}
-Các biểu đồ hoạt động dùng làn (swimlane) để phân định trách nhiệm giữa tác nhân và hệ thống.
+Các biểu đồ hoạt động dùng làn (swimlane) để phân định trách nhiệm giữa tác nhân và hệ thống: nút bo tròn là hành động, hình thoi là điểm quyết định; màu xanh lá đánh dấu bước thay đổi trạng thái thành công, màu đỏ là nhánh bị từ chối hoặc cần xử lý đặc biệt.
 \fig[0.92\linewidth]{act_01_dangky_thuphi_thi}{Hoạt động: Đăng ký – Thu học phí – Kiểm tra đầu vào}{fig:act1}
 Hình~\ref{fig:act1} cho thấy điểm kiểm soát BR-01: nhánh “Hồ sơ đã PAID?” nằm trong làn hệ thống, nên kể cả khi người dùng gọi API trực tiếp (bỏ qua giao diện) cũng không thể làm bài khi chưa nộp phí.
 \fig[0.92\linewidth]{act_02_xeplop_pheduyet}{Hoạt động: Xếp lớp và xử lý vượt sĩ số}{fig:act2}
@@ -29,8 +29,8 @@ Hệ thống tách bạch hai loại trạng thái của lớp học:
   \item \textbf{Trạng thái vòng đời} được lưu trong CSDL: \texttt{RECRUITING}, \texttt{IN\_PROGRESS}, \texttt{COMPLETED}, \texttt{CANCELLED}. Chỉ thay đổi bằng thao tác có chủ đích (mở lớp, kết thúc, huỷ).
   \item \textbf{Trạng thái sĩ số} được \emph{tính toán} mỗi lần đọc từ sĩ số và số hồ sơ chờ: \texttt{BELOW\_MIN}, \texttt{ELIGIBLE}, \texttt{FULL}, \texttt{PENDING\_APPROVAL}, \texttt{OVER\_CAPACITY} (các trạng thái con trong Hình~\ref{fig:st1}). Nhờ vậy không bao giờ xảy ra tình huống “lớp ghi là đủ điều kiện mở nhưng thực tế đã có học viên rút”.
 \end{itemize}
-\fig[0.98\linewidth]{st_01_lop}{Biểu đồ trạng thái của Lớp học}{fig:st1}
-\fig[0.98\linewidth]{st_02_hoso}{Biểu đồ trạng thái của Hồ sơ đăng ký}{fig:st2}
+\fig[0.42\linewidth]{st_01_lop}{Biểu đồ trạng thái của Lớp học}{fig:st1}
+\fig[0.62\linewidth]{st_02_hoso}{Biểu đồ trạng thái của Hồ sơ đăng ký}{fig:st2}
 \fig[0.8\linewidth]{st_03_chat}{Biểu đồ trạng thái của Phiên tư vấn}{fig:st3}
 Ràng buộc giữa trạng thái hồ sơ và lớp được cưỡng chế ở mức CSDL: hồ sơ có \texttt{class\_id} khác rỗng \emph{khi và chỉ khi} ở trạng thái \texttt{ENROLLED} hoặc \texttt{WAITING\_APPROVAL}.
 
@@ -65,6 +65,7 @@ Lớp \texttt{Class} có các phương thức \texttt{minSize()}, \texttt{maxSiz
 
 \subsection{Sĩ số là giá trị tính toán}
 Thay vì lưu cột \texttt{current\_enrolled} trong bảng \texttt{classes} (dễ lệch khi có lỗi giữa chừng), sĩ số được tính qua view:
+\par\medskip\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=SQLx,caption={View tính sĩ số và hồ sơ chờ duyệt của từng lớp},label=lst:view]
 CREATE VIEW v_class_enrollment AS
 SELECT c.class_id,
@@ -74,6 +75,7 @@ SELECT c.class_id,
     WHERE r.class_id = c.class_id AND r.status = 'WAITING_APPROVAL') AS waiting
 FROM classes c;
 \end{lstlisting}
+\end{minipage}\par\medskip
 Kết hợp chỉ mục \texttt{ix\_reg\_class\_status(class\_id, status)}, truy vấn này vẫn nhanh với quy mô một trung tâm (hàng nghìn hồ sơ).
 
 \section{Thiết kế API}
@@ -84,7 +86,7 @@ Kết hợp chỉ mục \texttt{ix\_reg\_class\_status(class\_id, status)}, truy
   \headrow \hd{Phương thức} & \hd{Đường dẫn} & \hd{Chức năng – quyền} \\ \hline
   \endhead
   GET & \texttt{/api/courses}, \texttt{/api/courses/:id} & CN1 – danh mục, chi tiết khoá + lớp (công khai) \\ \hline
-  GET & \texttt{/api/classes?q\&certificate\&form\&shift\&level\&from\&available} & CN3 – tra cứu lớp (công khai) \\ \hline
+  GET & \texttt{/api/classes?...} & CN3 – tra cứu lớp (công khai); tham số lọc: \texttt{q}, \texttt{certificate}, \texttt{form}, \texttt{shift}, \texttt{level}, \texttt{from}, \texttt{available} \\ \hline
   POST & \texttt{/api/registrations} & CN2 – đăng ký (công khai) \\ \hline
   POST & \texttt{/api/registrations/lookup} & Tra cứu hồ sơ bằng mã + SĐT \\ \hline
   POST & \texttt{/api/registrations/:code/pay} & Thanh toán trực tuyến (mô phỏng) \\ \hline

@@ -65,9 +65,10 @@ function submit(reg, answers) {
     const cleaned = {};
     for (const k of keys) {
       const a = answers[k.question_id];
-      if (a !== undefined && a !== null && a !== '') {
-        cleaned[k.question_id] = Number(a);
-        if (Number(a) === k.answer_index) score++;
+      const v = Number(a);
+      if (a !== undefined && a !== null && a !== '' && Number.isInteger(v) && v >= 0 && v <= 3) {
+        cleaned[k.question_id] = v;
+        if (v === k.answer_index) score++;
       }
     }
     const level = rules.scoreToLevel(score, ids.length);

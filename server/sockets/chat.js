@@ -76,7 +76,7 @@ function initChat(io) {
 
     // ---------- Phía tư vấn viên
     on('chat:claim', ({ sessionId }) => {
-      if (!staff) throw new Error('Chỉ nhân viên mới nhận được phiên tư vấn.');
+      if (!staff || !['CONSULTANT', 'DIRECTOR'].includes(staff.role)) throw new Error('Chỉ tư vấn viên mới nhận được phiên tư vấn.');
       const before = chat.getSession(sessionId);
       const session = chat.claim(sessionId, staff.uid);
       socket.join(room(sessionId));

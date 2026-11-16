@@ -22,9 +22,9 @@ Yêu cầu: Node.js ≥ 22, Chrome hoặc Edge.
 npm install
 npm start            # http://localhost:3000  (cổng học viên)
                      # http://localhost:3000/admin  (văn phòng)
-npm test             # 72 ca kiểm thử tự động
+npm test             # 78 ca kiểm thử tự động
 npm run seed         # tạo lại CSDL mẫu (chạy được cả khi máy chủ đang bật)
-npm run diagrams     # render 21 biểu đồ Mermaid -> docs/diagrams/png
+npm run diagrams     # render 21 biểu đồ (Mermaid + swimlane) -> docs/diagrams/png
 npm run screenshots  # chụp ảnh giao diện cho báo cáo (máy chủ phải đang chạy)
 ```
 
@@ -45,7 +45,7 @@ server/   index.js, app.js, config.js
 public/   index.html (cổng học viên), admin.html (dashboard), css/, js/
 tests/    rules.test.js, api.test.js, chat.test.js
 docs/     analysis/ (phân tích đề bài, đặc tả use case), diagrams/src/*.mmd -> diagrams/png/
-tools/    render-diagrams.js, screenshots.js
+tools/    render-diagrams.js, render-swimlanes.js, screenshots.js
 report/   Báo cáo LaTeX (XeLaTeX) -> Bao_Cao_Project2_NguyenLeQuan_20235199.pdf
 ```
 

@@ -79,6 +79,21 @@ describe('BR-04 – phương án xử lý tờ trình', () => {
   test('30 + 9 = 39 → chưa chia đều được', () => {
     assert.equal(R.proposeResolution({ enrolled: 30, waiting: 9 }).options.SPLIT.mode, 'REMAINDER');
   });
+  test('30 + 35 = 65 → tách 3 lớp 22 + 22 + 21, không lớp nào vượt 30', () => {
+    const p = R.proposeResolution({ enrolled: 30, waiting: 35, roomCapacity: 40 });
+    assert.deepEqual(p.options.SPLIT.sizes, [22, 22, 21]);
+    assert.ok(p.options.SPLIT.sizes.every((n) => n >= 20 && n <= 30));
+  });
+  test('Mọi tổng từ 40 đến 200: các lớp sau khi chia đều nằm trong [20, 30]', () => {
+    for (let waiting = 10; waiting <= 170; waiting++) {
+      const { sizes } = R.proposeResolution({ enrolled: 30, waiting }).options.SPLIT;
+      assert.equal(sizes.reduce((a, b) => a + b, 0), 30 + waiting);
+      assert.ok(sizes.every((n) => n >= 20 && n <= 30), `tổng ${30 + waiting}: ${sizes}`);
+    }
+  });
+  test('Lớp đang học, 35 hồ sơ chờ → giữ 30, phần dư tách 18 + 17', () => {
+    assert.deepEqual(R.proposeResolution({ enrolled: 30, waiting: 35, inProgress: true }).options.SPLIT.sizes, [30, 18, 17]);
+  });
   test('Lớp đang học → chỉ tách phần dư', () => {
     assert.equal(R.proposeResolution({ enrolled: 30, waiting: 12, inProgress: true }).options.SPLIT.mode, 'REMAINDER');
   });
